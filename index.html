@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Clear-Eyed Dating — Conflict & Repair (prototype slice)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,500&family=Inter:wght@300;400;500;600&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* gold-shifted: cooler/deeper wine, warmer + more present gold */
+  --cream:#f5eee1;
+  --cream-deep:#ece0cd;
+  --paper:#fbf6ec;
+  --ink:#281a15;
+  --ink-soft:#5c443a;
+  --wine:#6c2230;
+  --wine-deep:#4d1620;
+  --gold:#c2913f;
+  --gold-soft:#d8b27e;
+  --rose:#e2a892;
+  --line:rgba(40,26,21,0.12);
+  --shadow:rgba(76,22,32,0.10);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Inter',sans-serif;
+  background:var(--cream);
+  color:var(--ink);
+  line-height:1.62;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+/* paper grain, borrowed from the existing design system */
+body::after{
+  content:'';position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.35'/%3E%3C/svg%3E");
+  opacity:.05;pointer-events:none;z-index:1;mix-blend-mode:multiply;
+}
+.wrap{position:relative;z-index:2;max-width:680px;margin:0 auto;padding:0 22px 90px}
+
+/* ---------- header ---------- */
+.masthead{padding:46px 0 26px;text-align:center}
+.kicker{font-size:.7rem;letter-spacing:.32em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:14px}
+.wordmark{font-family:'Fraunces',serif;font-weight:400;font-size:2.5rem;letter-spacing:-.01em;line-height:1.05;color:var(--wine)}
+.wordmark em{font-style:italic;color:var(--ink)}
+.creed{max-width:430px;margin:18px auto 0;color:var(--ink-soft);font-size:1.02rem}
+.creed b{color:var(--ink);font-weight:600}
+
+/* gold hairline divider */
+.rule{height:1px;background:linear-gradient(90deg,transparent,var(--gold-soft),transparent);margin:34px 0;opacity:.8}
+
+/* ---------- lens bar ---------- */
+.lens-bar{
+  background:var(--paper);border:1px solid var(--line);border-left:3px solid var(--gold);
+  border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:11px 13px;flex-wrap:wrap;
+}
+.lens-bar .ls-label{font-size:.66rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);font-weight:600}
+.toggle{display:inline-flex;flex-wrap:wrap;background:var(--cream-deep);border-radius:100px;padding:3px;gap:2px}
+.t-btn{font-family:'Inter',sans-serif;font-size:.78rem;font-weight:500;color:var(--ink-soft);
+  border:none;background:transparent;border-radius:100px;padding:6px 13px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.t-btn.active{background:var(--wine);color:var(--cream);font-weight:600}
+.lens-bar .spacer{flex:1;min-width:6px}
+.lens-hint{font-size:.82rem;color:var(--ink-soft);margin:9px 2px 0;font-style:italic}
+.btn{
+  font-family:'Inter',sans-serif;font-size:.82rem;font-weight:600;letter-spacing:.01em;
+  border:none;cursor:pointer;border-radius:100px;padding:10px 18px;
+  background:var(--wine);color:var(--cream);transition:background .18s,transform .12s;
+}
+.btn:hover{background:var(--wine-deep)}
+.btn:active{transform:translateY(1px)}
+.btn.ghost{background:transparent;color:var(--ink-soft);border:1px solid var(--line);padding:8px 14px}
+.btn.ghost:hover{color:var(--wine);border-color:var(--gold-soft)}
+
+/* ---------- section intro ---------- */
+.cat-eyebrow{font-size:.7rem;letter-spacing:.28em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:10px}
+.cat-title{font-family:'Fraunces',serif;font-size:2rem;font-weight:400;letter-spacing:-.01em;color:var(--ink);line-height:1.12}
+.cat-title em{font-style:italic;color:var(--wine)}
+.cat-intro{color:var(--ink-soft);margin-top:14px;font-size:1.02rem}
+.cat-nav{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:28px}
+.cat-pill{font-family:'Inter',sans-serif;font-size:.82rem;font-weight:500;color:var(--ink-soft);background:var(--paper);border:1px solid var(--line);border-radius:100px;padding:8px 15px;cursor:pointer;transition:all .15s}
+.cat-pill:hover{border-color:var(--gold-soft);color:var(--wine)}
+.cat-pill.active{background:var(--wine);color:var(--cream);border-color:var(--wine)}
+.cat-pill .pn{font-family:'Caveat',cursive;font-size:1.05rem;margin-right:5px;opacity:.85}
+
+/* ---------- question cards ---------- */
+.card{
+  background:var(--paper);
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:24px 24px 22px;
+  margin-top:18px;
+  box-shadow:0 10px 30px -22px var(--shadow);
+}
+.card .num{font-family:'Caveat',cursive;font-size:1.5rem;color:var(--gold);line-height:1;margin-bottom:6px}
+.card .ask{font-family:'Fraunces',serif;font-size:1.32rem;font-weight:400;line-height:1.32;color:var(--ink);margin-bottom:18px}
+.layer{display:flex;gap:12px;padding:10px 0;border-top:1px dashed var(--line)}
+.layer:first-of-type{border-top:none}
+.layer .tag{
+  flex-shrink:0;width:104px;font-size:.64rem;letter-spacing:.13em;text-transform:uppercase;
+  font-weight:600;padding-top:3px;
+}
+.layer .body{font-size:.95rem;color:var(--ink-soft);line-height:1.55}
+.tag-good{color:#4a7a4e}
+.tag-know{color:var(--gold)}
+.tag-lens{color:var(--wine)}
+.layer.lens-layer .body{color:var(--ink)}
+.layer.lens-layer{background:linear-gradient(90deg,rgba(194,145,63,.06),transparent);border-radius:8px;margin:6px -8px 0;padding:12px 8px}
+.lens-pending{font-style:italic;color:var(--ink-soft)}
+.lens-row{margin-bottom:8px;line-height:1.5}
+.lens-row:last-child{margin-bottom:0}
+.lt-secure{color:#4a7a4e;font-weight:600}
+.lt-anxious{color:var(--wine);font-weight:600}
+.lt-avoidant{color:var(--gold);font-weight:600}
+.lt-fearful{color:#a8566a;font-weight:600}
+
+/* ---------- quiz overlay ---------- */
+.overlay{position:fixed;inset:0;z-index:50;background:rgba(40,26,21,.55);backdrop-filter:blur(4px);display:none;align-items:flex-start;justify-content:center;overflow-y:auto;padding:30px 16px}
+.overlay.open{display:flex}
+.quiz{
+  background:var(--cream);border-radius:20px;max-width:540px;width:100%;
+  padding:30px 26px 26px;box-shadow:0 30px 80px -20px rgba(40,26,21,.5);position:relative;
+}
+.quiz .x{position:absolute;top:16px;right:18px;background:none;border:none;font-size:1.4rem;color:var(--ink-soft);cursor:pointer;line-height:1}
+.quiz h2{font-family:'Fraunces',serif;font-weight:400;font-size:1.7rem;color:var(--wine);line-height:1.15}
+.quiz .sub{color:var(--ink-soft);font-size:.92rem;margin:10px 0 6px}
+.quiz .disclaim{font-size:.78rem;color:var(--ink-soft);opacity:.85;margin-bottom:8px}
+.progress{height:4px;background:var(--cream-deep);border-radius:4px;overflow:hidden;margin:14px 0 20px}
+.progress i{display:block;height:100%;background:var(--gold);width:0;transition:width .25s}
+.q-text{font-family:'Fraunces',serif;font-size:1.25rem;line-height:1.3;color:var(--ink);margin-bottom:16px}
+.opt{
+  display:block;width:100%;text-align:left;background:var(--paper);border:1px solid var(--line);
+  border-radius:12px;padding:14px 16px;margin-bottom:10px;cursor:pointer;font-family:inherit;
+  font-size:.96rem;color:var(--ink);transition:border-color .15s,background .15s;
+}
+.opt:hover{border-color:var(--gold-soft);background:#fff}
+.result{display:none}
+.result.show{display:block}
+.result .badge{font-family:'Caveat',cursive;font-size:1.4rem;color:var(--gold)}
+.result h3{font-family:'Fraunces',serif;font-style:italic;font-weight:500;font-size:1.9rem;color:var(--wine);margin:2px 0 12px;line-height:1.1}
+.result p{color:var(--ink-soft);font-size:1rem;margin-bottom:18px}
+
+@media(max-width:520px){
+  .wordmark{font-size:2.1rem}
+  .layer{flex-direction:column;gap:3px}
+  .layer .tag{width:auto;padding-top:0}
+  .card .ask{font-size:1.18rem}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <div class="kicker">A Date Labs field guide · working title</div>
+    <div class="wordmark">Clear-Eyed <em>Dating</em></div>
+    <p class="creed">Not a test someone passes or fails. A way to <b>know what you're walking into</b> — and find the right fit, before you're in deep.</p>
+  </header>
+
+  <div class="lens-bar">
+    <span class="ls-label">Your lens</span>
+    <div class="toggle" id="lensToggle">
+      <button class="t-btn active" data-l="all">Show all</button>
+      <button class="t-btn" data-l="secure">Secure</button>
+      <button class="t-btn" data-l="anxious">Anxious</button>
+      <button class="t-btn" data-l="avoidant">Avoidant</button>
+      <button class="t-btn" data-l="fearful">Anxious-avoidant</button>
+    </div>
+    <span class="spacer"></span>
+    <button class="btn ghost" id="lensBtn">Not sure? Take the 2-min quiz</button>
+  </div>
+  <p class="lens-hint" id="lensHint"></p>
+
+  <div class="rule"></div>
+
+  <nav class="cat-nav" id="catNav"></nav>
+
+  <div id="catHead"></div>
+
+  <div id="cards"></div>
+
+</div>
+
+<!-- ===== quiz overlay ===== -->
+<div class="overlay" id="overlay">
+  <div class="quiz">
+    <button class="x" id="quizClose" aria-label="Close">×</button>
+    <div id="quizQuestions">
+      <div class="kicker" style="color:var(--gold)">Find your lens</div>
+      <h2>How do <em style="font-style:italic">you</em> tend to do closeness?</h2>
+      <p class="sub">Six quick reads. There are no wrong answers — this just tunes the guide to the way you're wired.</p>
+      <p class="disclaim">A rough, directional read — a tendency to keep an eye on, not a diagnosis.</p>
+      <div class="progress"><i id="progBar"></i></div>
+      <div id="qSlot"></div>
+    </div>
+    <div class="result" id="quizResult">
+      <span class="badge">Your lens</span>
+      <h3 id="resTitle"></h3>
+      <p id="resBody"></p>
+      <button class="btn" id="resDone">See the questions through this lens</button>
+      <button class="btn ghost" id="resRetake" style="margin-left:8px">Retake</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------------- data: edit freely ---------------- */
+const QUIZ = [
+  {q:"They take a few hours to text back. Your first instinct:",
+   a:["Assume they're busy — barely think about it. (secure)",
+      "Start wondering if you did something wrong. (anxious)",
+      "Feel a little relieved to have the space. (avoidant)"]},
+  {q:"Things are getting genuinely close and serious. Your gut:",
+   a:["Likes it and leans in. (secure)",
+      "Wants reassurance it's just as real for them. (anxious)",
+      "Feels a quiet urge to make some distance. (avoidant)"]},
+  {q:"Right after a disagreement, you most want to:",
+   a:["Talk it through, then reconnect. (secure)",
+      "Fix it now — you can't settle until it's okay. (anxious)",
+      "Get some space before you deal with it. (avoidant)"]},
+  {q:"Someone who's very steady, consistent, always available tends to feel:",
+   a:["Safe — you relax into it. (secure)",
+      "Almost too good — you wonder when it'll change. (anxious)",
+      "A little less exciting than the unpredictable ones. (avoidant)"]},
+  {q:"When you need support, you usually:",
+   a:["Ask for it directly. (secure)",
+      "Hope they'll notice without you having to ask. (anxious)",
+      "Handle it yourself — asking feels uncomfortable. (avoidant)"]},
+  {q:"Most of your exes would say you:",
+   a:["Communicated and stuck around through the hard stuff. (secure)",
+      "Needed a fair amount of reassurance. (anxious)",
+      "Pulled back when things got too close. (avoidant)"]},
+];
+const RESULTS = {
+  secure:{title:"Secure-leaning",
+    body:"You tend to read closeness as safe and stay fairly steady under stress — a real advantage. Your main risk in dating is patience: because you don't rattle easily, you can tolerate a poor fit far longer than you should. Watch for the moment 'I'm being understanding' becomes 'I'm ignoring something real.'"},
+  anxious:{title:"Anxious-leaning",
+    body:"You feel relationships deeply and you're quick to sense when something's off — that sensitivity is a strength when it's calibrated. Your main risk is reading intensity or inconsistency as chemistry, and quietly shrinking your own needs to keep someone close. The questions below will show you where that pull tends to cloud what you're seeing."},
+  avoidant:{title:"Avoidant-leaning",
+    body:"You value your independence and feel the pull to create distance when things get close — there's nothing wrong with needing space. Your main risk is mistaking a healthy, available person for 'too much' or 'boring,' and pulling out right when it gets real. The questions below will show you where that pull tends to cloud what you're seeing."},
+  fearful:{title:"Anxious-avoidant",
+    body:"You feel both pulls at once — a deep want for closeness and a deep fear of it. You can chase someone who pulls away and pull away from someone who comes close, sometimes in the same week. None of that means you're broken; it usually means closeness once came with a cost. Your work here is to notice which alarm is firing in the moment — the fear of being left, or the fear of being known — because they pull you in opposite directions and need opposite responses. The questions below will help you tell them apart."},
+};
+
+/* ---------------- Conflict & Repair questions: edit freely ---------------- */
+const CARDS = [
+  {ask:`Walk me through the last fight you had with someone you love — not what it was about, but how it ended. Who moved first to fix it, and what did that actually look like?`,
+   good:`Someone moved toward the other on purpose, and they can describe it as a real moment — a text, a hand on the back, an actual sentence — not just "we cooled off." They remember what the other person needed, which means they were watching.`,
+   know:`The fight didn't end so much as evaporate — or someone won and someone went quiet. If no one in their stories ever moves first, picture being the one who always does. That's the role that's open.`,
+   lens:{secure:`You repair cleanly, so you may assume they can too. Watch whether they actually reach back, or just let you carry the reaching every single time. Being the steady one is a gift — it shouldn't quietly become a job only you have.`,
+         anxious:`You're built to move first and fast. Notice if you'd be the only one who ever does — that's not closeness, that's you quietly working two jobs.`,
+         avoidant:`"We just let it blow over" can sound like peace and actually be two people who never found their way back to each other. Notice if that's the version you're most comfortable with — in them, and in you.`,
+         fearful:`You may feel both pulls at once here — wanting them to move toward you, and feeling oddly unsettled when they actually do. Notice if a partner who repairs cleanly makes you want to pick at it. Safety can feel suspicious to you. That doesn't make it unsafe.`}},
+
+  {ask:`In the middle of an argument — the second it lands that you're the one who's wrong — what happens in you before you say anything? And then what do you do with it?`,
+   good:`They can find that moment and stay inside it. The honest answer has some friction in it — a swallow, a pause, "I hate this" — and then they say it anyway. Being wrong doesn't put a dent in who they are.`,
+   know:`They can't locate the feeling at all, or it converts straight to heat: "I'm just blunt," winning the point, flipping it back onto you. Someone who can't survive being wrong will quietly need you to be wrong instead.`,
+   lens:{secure:`You own being wrong easily, so you may assume anyone can. Don't quietly cover the gap by becoming the only one who ever concedes. If they can't ever say "I was wrong," your easy accountability will slowly turn into you carrying the blame for both of you.`,
+         anxious:`Watch the opposite reflex in yourself — diving for "no, it's me, I'm sorry" before you've even checked whether it's true. Your wrongness is not a peace offering you hand over to lower the temperature.`,
+         avoidant:`For you the tell is the exit — going cold, going still, leaving the sentence unfinished. Notice if their "handling it" is the same disappearing act you'd recognize from the inside.`,
+         fearful:`Your version of this swings — flooding with "it's all my fault" one moment, going cold and unreachable the next. Notice the swing itself. The aim isn't either pole; it's staying in the room long enough to find what's actually true.`}},
+
+  {ask:`When you've genuinely hurt someone, what does your apology sound like out loud? Not that you're sorry it happened — that you did it.`,
+   good:`They name the specific thing and the specific impact, and there's no "but" hiding at the end. The apology is about what they did, not how bad they now feel — they don't quietly turn it around so you end up comforting them.`,
+   know:`"I'm sorry you felt that way." "I already said sorry, what else do you want." An apology that slowly becomes a list of your faults. These don't soften with time — they just get more rehearsed.`,
+   lens:{secure:`You apologize cleanly, so a non-apology can slide right past you as "well, at least they said it." Hold the bar. Sorry-you-feel-that-way is not the same currency, and your generosity is exactly what lets a weak apology keep passing.`,
+         anxious:`Notice if you've trained yourself to accept the apology-shaped object because holding the line — saying "that's not actually an apology" — feels too dangerous to risk.`,
+         fearful:`Notice if you both accept the weak apology to keep the peace and quietly file it away as a reason to leave later. That move keeps closeness at arm's length twice over.`}},
+
+  {ask:`When something's wrong and you need to pull back for a while — how do I find out? Do you tell me, or do I just feel the room go cold and spend the next two hours combing back through everything I said?`,
+   good:`They tell you. "I need an hour. I'm not going anywhere. I'll come find you." It sounds like such a small thing — but feel what it actually does: your nervous system never has to do the math of whether you're being left. A partner who hands you that one sentence is quietly handing you years of not bracing.`,
+   know:`If their answer is that you'll "just be able to tell," that's a life of reading weather. You slowly become an expert in their silences, fluent in a language you never wanted to learn, forever managing a mood that was never once explained to you. After a while it stops feeling like love. It feels like a job you can't clock out of — and the worst part is you'll blame yourself for being bad at it.`,
+   lens:{secure:`You can hold space without spiraling, which is genuinely a gift — and it's the exact thing that can make you slow to notice when "space" has quietly hardened into stonewalling. Your calm is not proof everything's fine. If you're always the steady one waiting out their silence, that's worth naming out loud, not absorbing.`,
+         anxious:`Here's exactly where your own wiring will lie to you. When a steady partner takes their hour, your body will scream that they're leaving, and every cell will want to chase — to fix it, to earn them back before they're even gone. Learn this difference in your bones: someone who steps away while telling you they'll return is not abandoning you. The chasing is the old wound talking, not the truth in front of you. The only way to find out what they really are is to let the hour pass and watch whether they come back. They will, or they won't — and either way, now you know.`,
+         avoidant:`Be honest, because this one lands on you too. When you go quiet to get room, the person across from you is doing the exact thing you'd hate — guessing in the dark. "I need space" can be a real reset, or it can be the door you close so the conversation never has to happen. You'll know which one it is by whether you ever walk back through it and finish what you started.`,
+         fearful:`This one comes at you from both sides — their space reads as abandonment, and their closeness can read as a cage. You might chase when they pull back and pull back when they get close. Before you move either way, ask which alarm is firing: the fear of being left, or the fear of being known. They need opposite answers, and you can only choose well once you know which one it is.`}},
+
+  {ask:`Think of the ex you fought with the most. Knowing everything you know now — what was the part that was actually yours? Not the diplomatic 50/50 answer. Your real half.`,
+   good:`They can name something specific and a little unflattering about themselves, with some warmth still left over for the ex. They've metabolized it — the ex comes through as a whole person, not a cautionary tale.`,
+   know:`Every ex is "crazy," "toxic," "psycho." Someone with a graveyard of monsters behind them is telling you who you'll be by next year. The flip side is real too — wall-to-wall self-blame can mean a partner who'll hand you the job of managing their guilt.`,
+   lens:{secure:`You'll hear a fair, owned answer clearly — trust that read. Your risk is the opposite: you're so willing to see someone's side that you may explain away a whole graveyard of "crazy exes" as them just being honest. Contempt for every past partner is still data, even when it's delivered to you calmly and reasonably.`,
+         anxious:`If they give you all the blame and it sounds like humility, slow all the way down. You're primed to admire the person who "takes responsibility" — make sure it's accountability and not a performance aimed straight at you.`,
+         avoidant:`Quietly sit with the same question yourself. You'd want a fair, generous answer from a partner — the same question points back at you, too.`,
+         fearful:`You may swing between "it was all them" and "it was all me" depending on the day. Neither extreme is the truth — and landing on "all me" can be its own way of keeping control of the story. A real, partial half is harder to hold, and far more honest.`}},
+
+  {ask:`When someone you love says "that hurt me" — in the first few seconds, before the thinking part of you catches up — what does your body do? Move toward them, or go hard?`,
+   good:`They can stay. And notice what staying actually requires of them: that they believe your pain is real information about you, not an accusation about them. A partner built this way turns every hard conversation into something that pulls you closer instead of something you slowly learn to avoid. That's the whole game. That's the thing that makes thirty years with someone survivable.`,
+   know:`If "you hurt me" reliably becomes defense, a counter-strike, or a wall — watch what that does to you over the years. You start editing yourself. You round the hurt down, save it for a better moment that never comes, decide it isn't worth it. And one day you realize you've stopped bringing things to them at all. A relationship where you've gone silent to keep the peace was never peaceful. It's just lonely with another person in the room.`,
+   lens:{secure:`You can take feedback without it threatening you, so you may quietly underestimate how much it costs them to do the same — and hand a defensive reaction a pass you'd never need for yourself. Hold the same standard you hold for anyone: can they actually hear "you hurt me" and stay in the room? Your own steadiness shouldn't become the reason theirs goes unexamined.`,
+         anxious:`Watch your own first move on the other side of this — the scramble to soften it, to pre-apologize, to manage their face so they won't pull away. Notice you're already doing their emotional work for them before they've even reacted. You are allowed to say the true thing and let it be theirs to carry. A partner worth keeping wants to carry it — and the ones who make you feel guilty for handing it over are showing you, right now, who they are.`,
+         avoidant:`The wall and the smooth subject-change are the moves you'll be quickest to excuse in them, because they live in you too. Be careful there. The reflex you share is the one you'll be blindest to — and it's usually the quiet one that ends things from the inside, long before anyone says a word.`,
+         fearful:`You might do both in sequence — armor up first, then flood with apology and reassurance after. Watch that whiplash. What a partner needs to see is that you can hear "you hurt me" without either attacking or collapsing. Steady is the skill, and you already know both extremes by heart.`}},
+
+  {ask:`The morning after a real fight — what are you like? Do you wake up wanting to find your way back, or does it hang in the air until someone finally breaks?`,
+   good:`Warmth comes back on its own. They reach for ordinary — coffee, a hand, a small joke — without making you earn your way back into their good graces first.`,
+   know:`A cold shoulder that runs for days, the quiet scorekeeping, or acting like nothing happened at all (which doesn't repair anything — it just buries it shallow). The morning-after tells you the real price of every disagreement you'll ever have.`,
+   lens:{secure:`You reconnect easily — which means you may end up reconnecting all by yourself, doing the warmth for two and calling it harmony. Notice whether they ever reach back, or whether every morning-after only heals because you decided, again, to make it heal. A repair that's always one-sided isn't a repair; it's you managing the relationship alone.`,
+         anxious:`If mornings-after feel like walking on glass until they decide to thaw, that's not "we just needed to cool off." That's you being slowly trained to fear conflict. Name it to yourself, out loud.`,
+         fearful:`Mornings-after confuse you — you want to reconnect and you want to bolt, sometimes within the same hour. Notice any urge to test them by pulling away to see if they'll follow. It feels like protection. Mostly it just teaches you both that closeness isn't safe here.`}},
+
+  {ask:`Tell me about a time you were the problem — a fight you handled badly enough that it still makes you wince. What would the older, wiser version of you have done instead?`,
+   good:`They have a real one, told without flinching or fishing for reassurance, and they can name the actual lesson and what changed afterward. Self-knowledge that was paid for, not theorized.`,
+   know:`They can't think of a single one — or the "mistake" is a humblebrag in disguise ("I just cared too much"). Someone with no scenes that make them wince hasn't grown. They've just rewritten the tape with themselves as the reasonable one.`,
+   lens:{secure:`You can name your own bad moments without flinching, so the silence where theirs should be can slide right past you — you'll assume everyone is as honest with themselves as you are. If they've genuinely never been the problem in any story they tell, that isn't maturity, and your own easy self-honesty is exactly what makes that gap hard to see.`}},
+
+  {ask:`When we end up on truly opposite sides of something that matters to both of us — what do you hope I do? Hold my ground, or come around to yours?`,
+   good:`They want you to stay yourself. Sit for a second with how rare and how enormous that actually is — a partner who can love you and disagree with you in the same breath, without needing you to dissolve the difference just so they can feel close. That's someone you can build something true with, because the real you is allowed in the room with them.`,
+   know:`If they want you to defer — if a different opinion keeps getting relabeled as you being difficult, disloyal, "starting something" — picture the slow arithmetic of it. You give a little here to keep the warmth, a little there. Every trade is so small it's not worth a fight. And then five years on you look up and can't quite find yourself in your own life, and you can't name the day you went missing, because there wasn't one. There was just a thousand ordinary Tuesdays where staying yourself wasn't worth what it cost.`,
+   lens:{secure:`You can disagree and stay close, so being asked to defer may not even register as a cost at first — you'll bend a little because it's genuinely easy for you, not because you're afraid. Watch that ease. The bending still adds up exactly the same way, and a relaxed "I don't mind" can quietly harden, over years, into "I no longer have a say."`,
+         anxious:`Guard this one with your life. Your instinct will be to fold early and hand it a beautiful name — generous, easygoing, in love. Before you do, ask the question that cuts straight through: am I actually choosing this, or am I afraid of what happens if I don't? Keeping the peace and abandoning yourself feel identical from the inside. Only one of them lets you still be there in ten years.`,
+         avoidant:`Watch the mirror image in yourself — a partner who wants to actually work the disagreement through reading, to you, as too much, too needy, not worth it. Wanting to be met is not the same as being difficult. Sometimes the person asking to resolve it is offering you exactly the closeness you keep saying you want.`,
+         fearful:`You'll feel the fold-instinct and the flee-instinct fighting each other — give in to stay close, then resent the closeness and want out. Underneath both is one question: can I be fully myself and still be loved? A partner who lets you disagree is answering yes. Let yourself believe it before you sabotage it.`}},
+
+  {ask:`Who taught you what a fight looks like — and what did watching them teach you? What did you swear you'd never do, and how's that promise actually holding up?`,
+   good:`They've looked at it. They can name the pattern they came from and the specific work they're doing not to be that — with examples, not just good intentions. The promise has teeth.`,
+   know:`"They never fought" — which usually means it went underground: slammed doors, the silent treatment, a parent who left for three days. Or they're living out the exact thing they swore off and genuinely can't see it.`,
+   lens:{secure:`You may take "I'd never do what my dad did" at face value, because for you, knowing better and doing better mostly go together. They don't for everyone. Listen for whether they've actually built something different — examples, repair, change — or just gotten more polished at describing the same old move.`,
+         fearful:`If you came from chaos, calm can register as boring or even fake to you. Listen for whether they've built real steadiness — and notice your own pull to distrust it precisely because it's steady. Not all quiet is the calm-before-the-storm you grew up with.`}},
+
+  {ask:`Say you've hurt me, you've apologized, and I'm still not okay yet. That gap — where you've done your part but I'm not over it — what do you do in that space?`,
+   good:`They can sit in the discomfort of you not being fixed yet — they stay warm, keep showing up, don't bill you for the time it takes. Your healing isn't on their schedule.`,
+   know:`Impatience ("I said sorry, can we move on"), your hurt treated as their inconvenience, or warmth switched off until you forgive them on cue. A partner who can't tolerate your unfinished feelings will teach you, fast, to rush them.`,
+   lens:{secure:`You give people room to heal on their own timeline — a real strength — so you may extend that same patience to someone who keeps needing it because they keep hurting you. Make sure your grace isn't quietly doing the work of ignoring a pattern. Generous with a one-off; alert to a repeat.`,
+         anxious:`Notice your own pull to announce you're fine before you are, just to close the loop and feel safe again. You're allowed to still be hurt after they've finished apologizing.`,
+         avoidant:`Notice if your instinct is to "give space" that's really just leaving — going quiet until it blows over instead of staying close while it heals.`,
+         fearful:`You may rush to say you're fine (the anxious move) while quietly withdrawing at the same time (the avoidant one) — closing the loop while pulling the thread. Notice the double move. You're allowed to still be hurt and still stay close; you don't have to pick between performing okay and disappearing.`}},
+
+  {ask:`After things have gotten hard between you and someone you love — once the fight's behind you — what makes you feel close again? What's the thing that tells you you're truly okay?`,
+   good:`They can name it — the hand on the back, the dumb joke that breaks the ice, the plain "I'm sorry, I love you, we're fine." Knowing what makes someone feel reconnected is a map you'll use a thousand times. And there's real relief in hearing that, for them, a fight was never the end of anything — just weather that passes.`,
+   know:`If they can't picture feeling close again after conflict — if every fight feels a little final — go gentle. Some people grew up where anger meant someone left, and "we fought, and then we were okay" isn't something they've lived yet. You might get to show them it's possible. That's no small thing to give someone.`,
+   lens:{secure:`You repair and reconnect without much fear, so you can offer that steadiness freely. Just make sure you're being reached for too — not only ever the one who reaches first.`,
+         anxious:`After a fight you may need real reassurance to believe you're actually okay, and that's allowed. Notice what genuinely settles you, and ask for it out loud. The right person won't make you guess your way back to safe.`,
+         avoidant:`Reconnecting means softening while you still feel a little raw, which is hard for you — you'd often rather let it quietly pass. Notice the want underneath that. Coming back together out loud is what turns a fight into something that brought you closer, instead of one more thing you both just walked away from.`,
+         fearful:`Afterward you may swing between desperate for reassurance and too guarded to reach — and both leave you alone with it. Try naming what you need to feel okay again. Every time you let someone bring you back, your body learns a little more that closeness can survive a storm.`}},
+];
+
+/* ---------------- Attachment & Consistency questions: edit freely ---------------- */
+const CARDS2 = [
+  {ask:`When you really like someone, what's your style — steady and consistent, or more hot-and-cold depending on your mood and how busy you are? Be honest about how even it actually stays.`,
+   good:`The effort is steady and roughly matches the words. They don't run hot for ten days and vanish for four. You can feel the rhythm of it — and your body learns it can count on the rhythm, which is the quiet floor everything else gets built on.`,
+   know:`Big swings — intensity, then silence; a flood of attention, then "sorry, crazy week," over and over. "I'm just bad at texting" can be true, or it can be the cover story for a pattern. Inconsistent effort this early rarely turns consistent later. This is the most available they will ever be.`,
+   lens:{secure:`You read steadiness as safe, and you're right to. The risk is that a charming, inconsistent person can keep you granting the benefit of the doubt long past the point the pattern was clear. Steadiness is the data. Charm is just the weather.`,
+         anxious:`This is the big one for you. The hot-and-cold is the exact thing that will feel like passion — the highs higher because the lows came first. But butterflies from not knowing where you stand isn't chemistry, it's your nervous system on alert. Steady is supposed to feel calm, not boring. Let yourself relearn that.`,
+         avoidant:`If a steady, available person reads as a little boring, slow down before you act on it. That "boring" is usually just the absence of the chase — and the chase was never the love, it was the adrenaline. Don't mistake the quiet for nothing.`,
+         fearful:`You may be pulled toward the hot-and-cold precisely because its rhythm is familiar — uncertainty can feel like home. Notice when you call something "exciting" and it's really "I don't know if they'll be there tomorrow." The calm one isn't the threat. The familiar chaos is.`}},
+
+  {ask:`When you tell someone you'll do something — call, show up, handle it — how often does the thing actually happen? Tell me about the last time you said you'd do something and then didn't.`,
+   good:`Their words and their actions are the same size. And when they do drop something, they name it and come back to it — they don't make you decide whether to bring it up. You stop having to brace for the gap between what was promised and what arrives.`,
+   know:`A steady gap between what they say and what they do — promises that work more as mood-management for the moment than as things that will actually happen. "I meant to," on repeat. You start quietly lowering your expectations so you won't be disappointed. That lowering is the cost, and you pay it in yourself.`,
+   lens:{secure:`You do what you say, so you may assume they'll get there once they "settle in." Believe the pattern in front of you, not the potential you can see. Potential is not a person you can build a life with. Behavior is.`,
+         anxious:`You'll find yourself building the case for them — "they're just busy, just stressed, just bad at this." Count the actions, not the explanations you generate on their behalf. Consistency is not too much to ask. It's the floor.`,
+         avoidant:`Be honest — you may feel a flicker of relief when a partner's words don't fully commit, because it keeps your own exit open. Notice if you're choosing someone a little flaky because they ask less of you, then calling it "low pressure."`,
+         fearful:`One broken promise can flip you from "it's totally fine" straight to "I'm done," skipping the conversation entirely. Stay long enough to learn whether it was a one-off or a pattern. The leaving impulse is fast; the truth takes a few more data points.`}},
+
+  {ask:`How do you feel about your exes these days, looking back? When you think about the people you used to love, what comes up — and what do you think your own part was in how things ended?`,
+   good:`They can hold an ex as a whole person — some warmth, some ownership, no contempt. The relationship ended but the human stayed human in the telling. That's the single clearest preview you get of how they'll talk about you, one day, to someone else.`,
+   know:`Every ex is "crazy" or "toxic." Or one of them still runs the whole show — years of obsession dressed up as a story. Or it's strangely flat, nothing to say about people they supposedly loved. Each version tells you something about how they hold closeness once it's over.`,
+   lens:{secure:`You'll hear the contempt or the warmth clearly. Your risk is fairness — you're so willing to grant "she was just crazy" as one honest side of a story that you can miss what wall-to-wall contempt is actually telling you. How someone speaks about people they used to love is how they will one day speak about you.`,
+         anxious:`Watch the pull to prove you're different — that you'll be the one who isn't "crazy," who finally gets it right. That instinct has you auditioning instead of evaluating. What you're assessing is whether they can hold complexity, not whether you can earn an exemption.`,
+         avoidant:`Notice if you nod along a little too readily at "they got too needy, I needed space." Whose side you instinctively take here is quiet information about you — and about the story you tell yourself when you're the one who leaves.`,
+         fearful:`You'll scan hard for whether you'd be safe with someone who talks this way — a good instinct, keep it. Just separate two things that blur for you: "they once hurt someone" and "they can't be honest about having hurt someone." The first is being human. The second is the actual warning.`}},
+
+  {ask:`When a relationship is going well and genuinely getting closer, what happens in you? Do you settle into it — or does some part of you quietly start scanning for the exit?`,
+   good:`Closeness feels good to them rather than threatening. They can point to a relationship that deepened over time and they stayed inside the deepening. Someone who can tolerate good-and-close is rarer than it should be — and it's the whole ballgame for going the distance.`,
+   know:`The "honeymoon ended, so I left" pattern. Closeness flips a switch and the itch starts; the chase always meant more than the catch. None of it makes them a villain — it makes them someone who hasn't yet been able to stay, and you'd be choosing to find out whether you're the exception.`,
+   lens:{secure:`Relax — and listen closely, because this one's mostly about them. Not everyone can sit inside good-and-close without sabotaging it. Your steadiness can't supply theirs; don't assume your calm will be enough to hold a relationship two people are meant to hold.`,
+         anxious:`You settle in — and then you grip. Notice if closeness makes you tighten your hold rather than soften into it, because the grip is the thing to watch in yourself. Holding tighter is how the fear of losing them quietly starts to cost you them.`,
+         avoidant:`This is your home question, so answer it honestly before you judge anyone else's answer. The partner who "gets boring once you actually have them" — make sure that isn't you, narrating your own exit as their shortcoming.`,
+         fearful:`You'll feel both at once — the relief of closeness and the urge to bolt from it, sometimes in the same evening. The push-pull is loudest exactly when things are going well, because that's when there's something real to lose. That's the moment to stay and breathe, not flee.`}},
+
+  {ask:`Who do you turn into when you really want to impress someone? And who are you when there's no one in the room worth impressing at all?`,
+   good:`The gap between the two is small. The person charming a room and the person dealing with someone powerless are recognizably the same person. Character that doesn't depend on who's watching is the kind you can actually trust over decades.`,
+   know:`Their words here may sound humble — the realer answer shows in what they do when they think it doesn't count: how they talk to the AI on their phone when it fails them, the support rep left on hold, anyone who can't reward them or push back. The contempt a person saves for things that can't fight back is exactly how they'll treat you the day you can't either — when you're sick, struggling, or just not impressive that week.`,
+   lens:{secure:`You're consistent across rooms, so you may not think to look for the gap in someone else — you'll assume the warm version is the whole person. Watch the moments they think don't count: how they snap at the assistant on their phone, the eye-roll at a stranger, the tone they reach for the second a situation stops being worth charming. Those unguarded seconds are the most honest data you'll get.`,
+         anxious:`When the charm is aimed at you, it's intoxicating and hard to see past. Try to watch them when the spotlight is off you entirely — that's where the real temperature lives, and where your longing is least likely to color the read.`,
+         avoidant:`You keep some distance from everyone, so a partner who's a bit cold to outsiders may not register as a flag — it might even feel like kinship. Notice if "we're both just private" is quietly covering something closer to contempt in them.`,
+         fearful:`You're hypervigilant to the flip from warm to cold — you've probably lived with someone who had two faces. Trust that radar. Just give it a few real data points before you decide, so you're reading them and not the ghost of whoever taught you to watch.`}},
+
+  {ask:`Tell me about a time being there for someone was genuinely inconvenient — bad timing, real cost to you, nothing in it for you — and what you actually did.`,
+   good:`They show up when it costs them something. Love as a verb, not just a feeling they report having. They can give you a specific story where they were tired or it was a hassle and they showed up anyway — that's the muscle that carries a relationship through the hard years.`,
+   know:`Present when it's fun, scarce when it's heavy. The support evaporates at the exact moment it's needed. Someone who only shows up when it's easy will be missing for all the parts of a life that aren't — and those parts are most of it.`,
+   lens:{secure:`You show up by default, so you may assume they will too when it counts. Don't wait for the crisis to find out. Look for whether they've already shown up for someone when it cost them — past behavior under inconvenience is the closest thing to a guarantee you get.`,
+         anxious:`You'll over-credit small gestures because you want it to be enough. A grand show of support once doesn't outweigh a pattern of absence. Watch what they do on the ordinary hard days, not the dramatic ones.`,
+         avoidant:`Notice if you actually prefer a partner who doesn't ask much of you when things get hard — it lets you off the hook too. The independence you prize can quietly become two people who never have to show up for each other.`,
+         fearful:`You may not even let people show up for you — you go it alone, then resent that no one came. Watch whether you give them the chance. You can't measure someone's reliability if you never let them near the moment it would matter.`}},
+
+  {ask:`How much of what's actually going on inside you do I get to see? Or do I get the highlight reel, and have to guess at the rest?`,
+   good:`They let you in, on a real timeline. They can name a feeling while it's happening, not only in clean retrospect months later. Being let into someone's inner world is most of what intimacy actually is — without it, you're dating the brochure.`,
+   know:`A permanent armor. "I'm just not an emotional person," used as a wall rather than a description. You become a full-time interpreter of someone who won't narrate themselves — and you'll mistake the work of guessing for the intimacy of knowing.`,
+   lens:{secure:`You share fairly openly, so you may keep waiting for them to "open up eventually," supplying patience on credit. Some people don't open the door no matter how safe you make it. Notice whether they're slowly letting you in, or whether you've just gotten used to knocking.`,
+         anxious:`A closed-off partner can be catnip to you — the unavailability reads as depth, and earning your way in feels like love. It isn't a project. You deserve someone whose inner life is offered, not extracted.`,
+         avoidant:`This question is a mirror. The armor you'd find frustrating in them is the one you wear. Notice if you choose people who don't ask you to open up, then feel lonely inside the very distance you arranged.`,
+         fearful:`You crave being deeply known and you're scared of it — so you may open up in a rush and then slam shut, testing whether they'll stay through both. Watch the pattern. Real closeness is built in steady increments, not in floods followed by walls.`}},
+
+  {ask:`Do the people close to you ever have to walk on eggshells around your moods? Be honest — has anyone ever told you they did?`,
+   good:`Their mood is reasonably steady, and they own the off days instead of making everyone else absorb them. They don't turn the whole room into a hostage of how they happen to feel. Calm you can rely on is its own kind of love.`,
+   know:`Volatility — the household orbits their weather, and everyone learns to read the sky before they speak. "I'm just moody," offered as a license rather than something they're working on. Walking on eggshells is exhausting in a way you stop noticing until you're finally free of it.`,
+   lens:{secure:`Your own steadiness means you can absorb a lot of someone else's volatility without registering the cost — you flex, you stay calm, you manage. Count how much managing you're doing. A relationship where one person stays steady by handling the other's moods isn't steady; it's just quietly one-sided.`,
+         anxious:`You're already an expert eggshell-walker — you'll adapt to their moods so smoothly you won't notice you've reorganized yourself around them. Notice the reorganizing. Being attuned to someone's mood is a gift; being governed by it is a cage.`,
+         avoidant:`You may handle a moody partner by simply going further away — which keeps the peace and keeps you out of reach. Notice if your "I just give them space" is really you leaving the field. Distance isn't the same as steadiness.`,
+         fearful:`A volatile partner can feel magnetic because the highs and lows match an old, familiar frequency — and calm can read as flat. Trust takes practice for you. Give the steady ones a real chance before your nervous system writes them off as boring.`}},
+
+  {ask:`What's something you've stayed consistent with for years — a friendship, a practice, a craft — long after the novelty wore off? And what did you do when it got boring?`,
+   good:`They can point to something they stayed with through the boring middle. They know how to keep showing up after the shine comes off — the exact skill a relationship needs in year three, when you're not new to each other anymore and love has to become a choice instead of a feeling.`,
+   know:`A trail of intense beginnings and quiet abandonments. Novelty is the only fuel; nothing survives once it stops being exciting. Be honest with yourself about what that predicts — because at some point, you stop being new too.`,
+   lens:{secure:`You can stay through the boring parts, so you may assume they'll learn to. Watch for whether they've ever actually done it, even once. The ability to love something past its novelty is not something you can install in another person by loving them harder.`,
+         anxious:`The intense beginning is the part you're most susceptible to — the sweep of it can read as the realest love you've ever felt. Slow down and look at what they've sustained, not how brightly they started. Beginnings are easy. Staying is the whole thing.`,
+         avoidant:`Honest mirror again: when something stops being novel for you, do you stay, or find a reason to move on? The "I just get bored" you'd want to watch in them may be the most important thing to watch in yourself.`,
+         fearful:`You may sabotage things right as they get good-and-steady, because steady is the part you've never been able to trust. Notice the urge to blow it up when it stops being dramatic. Boring, with the right person, isn't the end of love — it's where love finally gets to rest.`}},
+
+  {ask:`When what I need and what's easy for you pull in opposite directions, what tends to win? Tell me about a time those two things collided for you with someone you loved.`,
+   good:`Your needs register as real, and they flex toward you when it actually counts — not every time, but when it matters. They can describe choosing someone else's need over their own comfort without resentment. That flex is the difference between a partner and a roommate you sleep with.`,
+   know:`Their convenience reliably wins, and over time your needs get quietly relabeled "high maintenance" or "a lot." You learn to stop asking. A relationship where one person's comfort always outranks the other's needs isn't a partnership — it's a service you're providing.`,
+   lens:{secure:`You flex for people naturally, so you may not notice you've become the only one bending. Track the direction of the flexing over a few months. If it's nearly always you adjusting to them, your easy generosity has quietly become the whole arrangement.`,
+         anxious:`You'll make yourself small to keep the peace and call it being easygoing. There's a difference between gracefully giving and chronically going without. Notice which you're doing — and whether anyone would even know you had a need, since you've gotten so good at hiding them.`,
+         avoidant:`Watch your own side of this — a partner's needs can register as demands, as pressure, as too much. Sometimes "you're high maintenance" is just someone asking to matter to you. Their need isn't an attack on your freedom.`,
+         fearful:`You swing between abandoning your needs entirely to stay close, and erupting about them all at once when the resentment overflows. Neither lets the other person actually meet you. Practice the boring middle: naming a need calmly, early, before it becomes a verdict.`}},
+
+  {ask:`Are you the same person three months into a relationship as you are on the first few dates? Be honest — what tends to fade once you're comfortable, and what stays?`,
+   good:`They can honestly name what shifts and what holds — "I get quieter once I'm comfortable, but the showing-up doesn't change." That self-awareness is itself the green flag: it means the early warmth wasn't a costume they'll quietly take off once you're won.`,
+   know:`"I'm exactly the same, always" — said a beat too fast — or no real sense that a courtship self and a settled self could even differ. The people who can't see their own fade are the ones who bait-and-switch without ever meaning to. Once you've got enough of it, believe their behavior over the brochure.`,
+   lens:{secure:`You take people at face value, which mostly serves you — so a slow fade from the courtship self can register late, because you assumed the early version simply was who they were. Notice the drift. The question isn't who they were trying to be at the start; it's who they relax into once they feel sure of you.`,
+         anxious:`When the early intensity fades, you'll blame yourself — what did I do, how do I get it back? Usually nothing's wrong with you; the performance simply ended. Don't spend years trying to re-earn a version of someone that was never sustainable in the first place.`,
+         avoidant:`Be honest about your own fade. Do you show up hard at the start, then withdraw once it's secure? The disappearing courtship self you'd resent in a partner may be the exact move you make once someone is actually yours.`,
+         fearful:`The shift from courtship to ordinary can hit you as proof it was all fake, and send you for the exit. Slow down — some settling is normal, even good; not every fade is a betrayal. Learn the difference between the performance ending and the love thinning, because they look alike at first and call for opposite responses.`}},
+
+  {ask:`When have you felt most safe and steady with someone — like you didn't have to wonder where you stood? What did they do that let you feel that?`,
+   good:`They can describe it — and in describing it, they're telling you exactly how to be a safe harbor for them. Whether they've felt it often or are still hoping for it, learning what steadiness feels like to someone is one of the kindest things you can know about them.`,
+   know:`If they've never quite felt that safe with anyone, be gentle — it's a history, not a flag. Some people have only known love that kept them guessing, so steady can feel unfamiliar, even suspect, at first. You might be the one who teaches their nervous system that consistent is possible — a beautiful thing to become for someone.`,
+   lens:{secure:`You carry steadiness naturally and give it without thinking. Just make sure you're receiving it too, not only ever being the safe place while no one anchors you.`,
+         anxious:`If safe-and-steady has been rare for you, you might mistake intensity for security — the highs that follow the lows. The real thing is quieter. Let yourself notice what calm, reliable love actually feels like, and trust that it counts even though it doesn't spike.`,
+         avoidant:`Feeling safe enough to relax into someone can read, to you, as lowering a guard you'd rather keep up — and you may have called that guardedness "independence." Letting yourself feel steady with someone isn't losing your freedom. It might be the rest you didn't know you were tired enough to need.`,
+         fearful:`Safe and steady is exactly what you long for and exactly what trips your alarms — calm can feel like the quiet before something breaks. Let yourself answer this as a wish. The steadiness you're scared to trust is the very thing that, given time, finally quiets the fear.`}},
+];
+
+/* ---------------- Honesty & Integrity questions: edit freely ---------------- */
+const CARDS3 = [
+  {ask:`When telling the truth would cost you something — disappoint someone, make you look bad, lose you something you want — how do you usually handle it? Tell the hard truth, or smooth it over?`,
+   good:`They can admit honesty is hard and still choose it when it counts — and they can give you a real example where the truth cost them and they told it anyway. That's the whole foundation: you can trust what someone tells you exactly as far as they'll stay honest when it's expensive.`,
+   know:`Honesty that only shows up when it's free. The truth gets "managed" the moment it might cost them, and you won't know which version you're getting, because the comfortable one is always on offer. Over years, you stop being sure what's real — and that not-being-sure is its own quiet kind of lonely.`,
+   lens:{secure:`You tell the truth fairly easily, so you may assume others weigh it the way you do. Not everyone does. Watch whether their honesty holds when it actually costs them something — anyone can be honest when it's free, and that isn't yet evidence of much.`,
+         anxious:`Your risk is the mirror of theirs — you may smooth your own truth over to keep them close, then quietly resent that they don't really know you. Notice when you're editing yourself down to feel safe. Someone who can't handle your honest answer is giving you information, not a reason to hide.`,
+         avoidant:`You may admire someone who keeps things close, because you do too — "we both just don't overshare." Make sure that isn't shorthand for two people who never tell each other the costly truth. Privacy and evasion can look identical right up until something matters.`,
+         fearful:`You may swing between blunt honesty (to push them back) and careful hiding (to keep them close), depending on which fear is louder that day. Notice the swing. The aim isn't either extreme — it's telling a steady, kind truth and trusting it won't end you.`}},
+
+  {ask:`Where do you land on little white lies — the "I'm five minutes away" when you haven't left, the "love it!" about a gift you don't? Harmless social grease, or does it bug you?`,
+   good:`They've actually thought about it, and there's a line they hold even on the small stuff — or they can tell you exactly which little lies they're fine with and why. Someone with a considered relationship to small truths usually has a sturdy one with the big ones.`,
+   know:`Either small lies flow so easily they don't register as lies at all — so you'll never quite know when one's in play — or there's a rigidity that uses "honesty" as a license to be unkind. The pattern in the little stuff is the pattern. The big lies are just the small ones grown up.`,
+   lens:{secure:`You probably don't lie over small things, so a casual liar can charm you precisely because it doesn't occur to you to watch for it. Notice how fluidly the little untruths come. Someone for whom small lies are frictionless has simply had more practice than you'd expect.`,
+         anxious:`You may tell little lies to keep everyone comfortable and call it being nice. Some of that is kindness; some of it is fear in kindness's clothes. Notice the difference in yourself — and don't mistake someone else's smooth, constant small lies for the same easygoing warmth you offer.`,
+         avoidant:`The "it's not a big deal, it's just easier" school of small lies may feel reasonable to you — it keeps things low-friction and people at a comfortable distance. Notice if "easier" is doing a lot of quiet work, for them and for you.`,
+         fearful:`You're often scanning for the small lie as proof you can't trust anyone — and you'll sometimes find one and use it to bolt. A white lie is real data, but it isn't always a verdict. Let the pattern build before you decide the whole person is unsafe.`}},
+
+  {ask:`Do you do the right thing even when literally no one would ever find out? Be honest — when's a time you could've gotten away with something and didn't... or did?`,
+   good:`They can answer this honestly, both ways — a story where they did right with no audience, and probably one where they didn't and it still nags at them. Integrity that doesn't need a witness is the rarest, most load-bearing kind there is.`,
+   know:`Either they can't think of a single time no one watching mattered — or the "did" stories come with a shrug, no friction, no afterthought. Someone whose conscience only switches on when there's a chance of being caught will be exactly as faithful as their odds of getting seen.`,
+   lens:{secure:`Your own conscience runs whether or not anyone's looking, so you may just assume theirs does too. Don't. Listen for whether right-and-wrong carries any weight for them when there's no consequence attached — because the day there's no consequence is the day it counts.`,
+         anxious:`You'll want the reassuring answer so badly you may accept it too fast. Slow down and listen for whether the story is real or rehearsed. Your longing for them to be safe can't make them safe — only their actual track record can do that.`,
+         avoidant:`This one points back at you too. The privacy you guard so carefully — is it ever cover for doing what's easiest when no one would know? Integrity in the dark is the same question for both of you.`,
+         fearful:`You may grade this harshly because you've been burned by someone who was one person in public and another in private. Fair instinct — just leave room for honest imperfection. "I did the wrong thing once and it haunts me" is a better sign than a spotless answer.`}},
+
+  {ask:`When a friend tells you something in confidence, where does it go? And be honest with me — do you ever pass along other people's secrets?`,
+   good:`They hold what they're given. Notice the quiet promise inside that: the way someone guards other people's secrets is the way they'll guard yours, including the tender things you'll tell them at 2am someday. A vault for others is a vault for you.`,
+   know:`They serve up other people's secrets like little gifts — juicy, intimate, not theirs to give. It feels like closeness in the moment ("they trust me with this!"). It's actually a preview: you're next, in someone else's living room, handed over exactly the same way.`,
+   lens:{secure:`You keep confidences without thinking about it, so a charming gossip can slip past you — being told secrets feels like trust when it's really the opposite. Notice whose privacy they're spending to bond with you. It'll be yours soon enough.`,
+         anxious:`Being trusted with someone's secrets can feel like being chosen, and you may lean in to keep that feeling. Watch it. The person handing you other people's private pain is showing you what they do with private pain, not how special you are.`,
+         avoidant:`You guard your own privacy fiercely, so your instincts actually serve you here — use them. Just notice if you give a fellow "private person" a pass on gossip simply because they keep their own cards close. Discretion about yourself isn't the same as discretion about others.`,
+         fearful:`A betrayed confidence may send you straight to "no one can ever be trusted." Slow that down. One person's loose lips is information about that person — not proof of the whole world. Let it tell you about them, not confirm your oldest fear.`}},
+
+  {ask:`What's a true thing about yourself that's a little unflattering — something you don't love but you know is real? I'll go first if you want.`,
+   good:`They can name something genuinely unflattering and real, without spinning it into a virtue. That ability — to look at their own worst trait without flinching or polishing it — is the engine of every repair, every apology, every bit of growth you'll ever need from them.`,
+   know:`The "flaw" is a humblebrag ("I care too much," "I'm a perfectionist"), or they truly can't find one, or it tips into a flood of self-loathing that pulls for your reassurance. Someone who can't hold an honest, un-spun look at themselves can't be honest with you about the two of you, either.`,
+   lens:{secure:`You can own your own stuff, so you may extend credit to a non-answer — hearing "I work too hard" and filling in the self-awareness yourself. Don't fill it in for them. The capacity to name a real flaw, plainly, is exactly what you're checking for, and it either shows up or it doesn't.`,
+         anxious:`You may rush to reassure them out of any flaw they name ("no, you're wonderful"). Resist; let them own it. And notice your own pull to perform the lovable answer instead of telling a real one — you're allowed to be honestly imperfect, too.`,
+         avoidant:`This asks for exposure, the thing you're wired to dodge — so watch yourself escape with a joke or a too-tidy answer. The willingness to be a little exposed here, both ways, is the whole point. A perfectly armored answer tells the other person nothing.`,
+         fearful:`You might over-share your flaws as a test — lay out the worst and wait to be rejected — or hide them completely. Either way you're bracing. Try naming one real thing and letting it sit, without making it a test for them to fail or a wall for you to hide behind.`}},
+
+  {ask:`Be honest — do your stories stay the same no matter who's listening, or do the details shift a little depending on how you come off? We all do it a bit. How much do you?`,
+   good:`They can admit they shade things sometimes — everyone does — and still have a core of events that stays fixed regardless of the room. Self-awareness about their own spin is the green flag: it means there's a true version they're tracking underneath the telling.`,
+   know:`The story reshapes itself entirely depending on the audience — hero here, victim there — and they don't seem to notice they're doing it. When the truth is whatever serves the moment, you eventually realize you've never actually known what happened, including inside your own relationship.`,
+   lens:{secure:`You tell it straight, so you may not notice when someone else's version quietly drifts to fit the room. Pay attention when you hear the same event told two ways. The person for whom truth is flexible will, sooner or later, tell a flexible version of you.`,
+         anxious:`You may accept a shifting story because confronting the inconsistency feels too risky — like it could cost you the whole thing. Trust what you noticed. You're allowed to say "wait, that's not how you told it before" without it being an attack.`,
+         avoidant:`Notice your own editing here, too — the way you might shade a story to avoid being fully seen. The point isn't flawless consistency; it's whether there's a real version underneath, for both of you, that you're each willing to be pinned to.`,
+         fearful:`Catching one inconsistency can flip you to "everything they've said is a lie." Pump the brakes. People misremember and reshape innocently all the time. Look for a pattern of self-serving revision, not a single seam — the difference is enormous.`}},
+
+  {ask:`Think of a time you got caught in something you weren't proud of. In that first moment — did you own it, or scramble to cover? Be honest about the reflex.`,
+   good:`They can describe the scramble-instinct honestly and then tell you they chose to own it anyway — or own that they didn't, and what it cost. How someone behaves in the half-second after they're caught is the truest read you'll get on their character, because there's no time to perform.`,
+   know:`The instinct is to dig in, spin, or turn it on whoever caught them — and there's no version where they simply came clean. Someone whose first move under exposure is to manage you rather than own it will do that every time it matters most, when the stakes are highest.`,
+   lens:{secure:`You own mistakes without it threatening you, so you may underestimate how rare that is — and give a smooth, fast recovery more credit than it's earned. Watch the reflex underneath the recovery. The question isn't whether they eventually came around; it's where they went first.`,
+         anxious:`Watch your own scramble, too — the over-explaining, the three apologies, the managing of their reaction so they won't pull away. Owning something cleanly doesn't require you to also soothe everyone's feelings about it. Say the true thing and let it land.`,
+         avoidant:`Your version of "scramble" is often the cool exit — go quiet, change the subject, leave the room rather than be caught out. Notice if you'd recognize that move in them because it's yours. The reflex you share is the one you'll most want to forgive.`,
+         fearful:`Being caught — or catching them — can flood you with the old certainty that closeness always ends in betrayal. Stay long enough to see what they do next. Someone who owns it after the scramble is showing you they can repair, which is the opposite of the story you're braced for.`}},
+
+  {ask:`What's the difference, to you, between privacy and secrecy? Where's the line where "that's just private" becomes "I'm hiding this"?`,
+   good:`They can actually draw the line — privacy is "this is mine to hold," secrecy is "this would change how you see me if you knew." Someone who's thought about that line tends to live on the honest side of it, and can let you in without feeling invaded.`,
+   know:`Everything's "private," and the boundary slides to cover whatever they don't want you to see. Or the reverse — they think you're owed access to everything, and your "privacy" reads to them as betrayal. Both are control problems in different outfits, and both get heavier with time, not lighter.`,
+   lens:{secure:`You hold a healthy line here naturally, so an unhealthy one can take a while to register. Watch whether "that's private" ever lands right where something important is being hidden. A real boundary protects them; a fake one protects a secret from you.`,
+         anxious:`Your fear may push you toward wanting access to everything — every text, every whereabouts — to feel safe. That hunger is understandable, and it won't fill. The reassurance you actually need comes from their consistency over time, not from surveillance.`,
+         avoidant:`This is your tender spot. The thing you call "privacy" is sometimes a moat — a distance that feels safe to you and reads, to them, as shut out. Ask honestly which side of your own line you're living on, before you assess theirs.`,
+         fearful:`You may crave total transparency and refuse to give it, both at once — demanding the open book while keeping yours closed. Notice the double standard. The trust you want has to run both directions, in steady increments, or it never gets built at all.`}},
+
+  {ask:`How open are you about money — what you make, what you owe, what you actually spend? Is that something you'd lay out honestly with a partner, or keep close?`,
+   good:`They can talk about money plainly, including the unflattering parts — the debt, the bad habit, the gap between what they earn and what they have. Financial honesty is just regular honesty applied to the thing people lie about most, and someone straight about it tends to be straight about the rest.`,
+   know:`Vagueness, deflection, stories that don't quite add up — the secret account, the debt that surfaces years in, the spending that doesn't match the income. Money secrecy almost always travels with other secrecy, and it's the one that can quietly cost you a house, a future, a decade.`,
+   lens:{secure:`You're probably straightforward about money, so you may take a breezy "oh, I do fine" at face value. Don't let it slide on the things that'll bind your lives together. Vagueness about money this early tends to be the visible edge of something larger kept out of view.`,
+         anxious:`You may dodge the money conversation entirely for fear it makes you seem grasping or kills the romance. It doesn't — it's care. Wanting to know what you'd be building a life on isn't unromantic; it's the most grounded kind of love there is.`,
+         avoidant:`Money is exactly the kind of thing you'd rather keep in your own column — no merging, no accounting to anyone. Notice if "I keep my finances private" is really "I don't want to be accountable to a partner." Some privacy here is healthy; total opacity isn't.`,
+         fearful:`Money can trip every alarm you have — a whiff of secrecy reads as the whole betrayal arriving. Breathe. Ask the real questions and watch how they answer over time, rather than letting one vague reply confirm the worst before you actually know.`}},
+
+  {ask:`What's something you've done that you knew, somewhere in you, wasn't quite right — but talked yourself into anyway? How'd you square it at the time?`,
+   good:`They can name a real one and see the rationalization for what it was, in hindsight — "I told myself it was fine because I was angry, but I knew." That clarity is protective: someone who can catch their own justifications is far less likely to run one on you and believe it.`,
+   know:`They can't find a single example, or they re-justify it right there, fully convinced even now. The danger isn't people who do wrong knowing it's wrong — it's people who can talk themselves into anything and sleep fine. That machinery, aimed at you someday, is almost impossible to argue with.`,
+   lens:{secure:`You tend to call your own justifications honestly, so you may not clock how powerful someone else's rationalizing engine is. Listen for whether they can ever say "I was wrong, and I knew it." Someone who's always, in their own telling, the reasonable one has stopped being honest with themselves first.`,
+         anxious:`You may do the opposite — take on guilt that was never yours, square nothing, just absorb. Notice that pattern. And don't let someone else's airtight self-justification convince you that you must be the one actually at fault.`,
+         avoidant:`Your rationalizations often run toward "it was easier for everyone if I just handled it / left / said nothing." Notice how reasonable the exit always sounds in your own retelling. The story where withdrawing was the mature choice deserves a second look.`,
+         fearful:`You may swing between airtight self-justification and total self-blame, never landing on the plain middle truth. The skill, for both of you, is the same: holding "I did something not-quite-right, and I can own it" without it becoming either a defense or a sentence.`}},
+
+  {ask:`When you're with someone and you feel a pull toward somebody else — because that happens to everyone — what do you actually do with it? Bury it, act on it, talk about it?`,
+   good:`They treat attraction as normal and survivable — something to be honest about and not act on, rather than a secret to manage. The honesty matters more than the attraction itself: a partner who can name a feeling instead of hiding it is one you can navigate the long haul with.`,
+   know:`Either attraction is a shameful secret to be buried and never spoken of (which is exactly how affairs incubate), or it's treated as license — "I can't help how I feel." What someone does with a normal pull tells you whether their loyalty is a value or just a current mood.`,
+   lens:{secure:`You probably hold your own pulls toward other people lightly — you notice them, you don't act on them, you could name one without it meaning much. Because it's that easy for you, you may assume they manage theirs just as cleanly. Don't assume — listen to what they actually describe doing with it. The honesty-versus-secrecy split matters far more than whether the feeling shows up, because it always will.`,
+         anxious:`Start with your own: you may bury your pulls toward other people out of guilt, or never admit them for fear of what it would stir up — so honesty here can feel dangerous from either side. Then, when they answer openly ("yeah, it happens"), it can land as a threat instead of the reassurance it actually is. Try to hear the difference between a partner being honest about being human and a partner being careless with you. They are not the same, and confusing them will cost you good people.`,
+         avoidant:`Your own move is probably to keep the pull entirely to yourself — "it's private, it's nothing, no need to mention it." Notice how that sealed-off honesty is the exact soil affairs grow in. Then watch the flip side: when a partner names an attraction openly, you may read it as making a big deal of nothing — when really they're doing the transparent thing you find hardest. Transparency about small things is what makes the big things survivable.`,
+         fearful:`Your own instinct is often to withhold what you feel — keep your pulls sealed off — while bracing hard for the betrayal you're sure is coming from them. So you can end up demanding a confession you'd never offer yourself. Notice the double move. Mutual honesty about being human, built in small safe doses both ways, is the only thing that ever actually quiets this fear.`}},
+
+  {ask:`When have you felt safest being completely honest with someone — like you could say the real thing and still be held? What made that possible?`,
+   good:`They can describe what made honesty feel safe, and that's gold — it tells you how to build something where you both get to tell the truth. There's a specific relief in being fully known and not left, and someone who's tasted it knows exactly what they're reaching for.`,
+   know:`If they can't recall ever feeling safe enough to be fully honest, go gentle — that's tender, not a flag. Some people learned the truth got punished, so they hid. You might get to be the first person they don't have to perform for. Watching someone slowly trust that honesty is safe with you is one of the quiet privileges of loving them.`,
+   lens:{secure:`Honesty comes easily to you, so you can make it safe for someone else with little effort. Just make sure you're getting the same room to be fully truthful in return.`,
+         anxious:`You may have learned to hide your real feelings to keep people close, so "safe to be honest" might be rarer for you than you'd admit. Notice what lets you tell the truth without bracing. You deserve someone you don't have to manage yourself around.`,
+         avoidant:`Being fully honest means being fully seen, the thing you most protect yourself from. Notice the quiet wish under the privacy. There's a deep rest in not having to keep any part of yourself hidden — you're allowed to want it.`,
+         fearful:`The longing to be completely known and the fear of it live side by side in you. Let yourself answer this honestly: being truly seen, by the right person, isn't the danger your history says it is. Honesty given and received in small, safe doses is how that old fear finally loosens.`}},
+];
+
+/* ---------------- Empathy & Attunement questions: edit freely ---------------- */
+const CARDS4 = [
+  {ask:`How good are you at telling when someone you care about is off — even when they swear they're fine? Do you usually catch it, or do you need it spelled out?`,
+   good:`They actually track the people they love — the change in your voice, the quieter-than-usual, the smile that doesn't reach. Being noticed like that, without having to announce you're hurting, is one of the deepest comforts there is. It's the difference between being with someone and being truly seen by them.`,
+   know:`They don't clock it until you say it outright — and even then it can seem like news to them that you have a weather at all. It's not always coldness; some people were never taught to watch. But you'll spend the relationship narrating your own inner life like a tour guide, and a part of you will quietly tire of always having to ask to be seen.`,
+   lens:{secure:`You read people almost automatically, so you may assume everyone does — and write off someone who misses your cues as just "not a mind-reader." Some people can genuinely learn to notice. But check whether they're learning, or whether you've quietly taken on the job of broadcasting your needs so clearly that they never have to look up.`,
+         anxious:`You're often over-attuned — you read the room so fast you catch moods that aren't even there. That sensitivity is real, but it can run as anxiety rather than love. Notice if you scan them constantly for signs you're about to be left. And don't over-credit someone for "noticing" you when really you've trained yourself to perform fine so loudly the not-fine was impossible to see.`,
+         avoidant:`Tracking someone else's inner weather can feel like work to you — even a little intrusive — so you may quietly approve of a partner who also doesn't pry. Notice if "we both just give each other space" is really two people agreeing not to look. Being noticed is something you might want more than you let yourself ask for.`,
+         fearful:`You may swing between hyper-noticing every flicker in them and going completely blind when you're overwhelmed. The noticing can tip into watching for the betrayal you expect. Aim for the steady middle: paying real attention because you care, not because you're braced for the moment it all goes wrong.`}},
+
+  {ask:`When someone you love is hurting, what's your actual instinct — fix it, give them space, cheer them up, or just be in it with them?`,
+   good:`They can be in it with you. They know the difference between pain that wants solving and pain that just wants company, and they can offer the second without panicking. Someone who can sit beside your hardest feelings without rushing to make them disappear is someone you can fall apart in front of — and being able to fall apart safely is most of what makes a person feel like home.`,
+   know:`Every kind of pain gets met with the same move — fix it, distract you, or back off until you've cheered up. It can come from good intentions, but the message that lands is the same: your harder feelings are a problem to be managed, not a place they'll meet you. Over time you learn to bring them the easy stuff and grieve the rest alone.`,
+   lens:{secure:`You can sit with pain — yours and theirs — so you may not realize how rare that is, and you may quietly become the one who always holds the space while no one holds yours. Notice which direction it flows. Being the safe place for someone is a gift; being the only safe place, with nowhere to fall apart yourself, is a slow depletion.`,
+         anxious:`When someone you love hurts, you may leap to fix it — not only for them, but because their pain spikes your own fear that something's wrong between you. Notice if your "support" is really you trying to resolve your own discomfort. Sometimes the most loving thing, and the harder one for you, is to sit there and do nothing but stay.`,
+         avoidant:`Other people's big feelings can feel like a flood you need to escape, so your instinct may be to fix-and-flee — solve it fast, then exit. Notice the urge to leave the room, literally or emotionally, the second it gets heavy. Staying when it's uncomfortable is a muscle, and it's the exact one closeness is built from.`,
+         fearful:`You may dive all the way into someone's pain and then suddenly need to flee it — too close, then too much. Watch that whiplash; it can leave the other person more alone than if you'd never come close. Steady, unspectacular presence — just being there, not merging and not bolting — is the thing you're learning, and it's worth the practice.`}},
+
+  {ask:`When's the last time you genuinely changed your mind about something because you finally saw it through someone else's eyes?`,
+   good:`They can name a real one — a moment another person's experience actually moved them, and they can tell you what shifted. That capacity is the engine of every fair fight you'll ever have: a person who can be moved by your side of things is one you can actually reach, instead of one you negotiate with from across a wall.`,
+   know:`They can't think of a single time — or "changed my mind" really means they out-argued someone into going quiet. Someone who's never been genuinely moved by another person's experience isn't open; they're just waiting for their turn to talk. In a disagreement that matters, you won't be heard so much as managed.`,
+   lens:{secure:`You let yourself be moved fairly easily, so you may assume an unmovable person will come around once they understand you better. Some won't — being right matters more to them than being close. Watch whether your perspective ever actually lands and changes anything, or whether you've gotten used to being the only one who bends.`,
+         anxious:`Your risk is the reverse — you may be so quick to see it through their eyes that you lose your own view entirely, adopting their version to stay close. Perspective-taking is a strength only when you keep your own ground while you do it. Make sure "I understand you" doesn't quietly become "so I'll abandon what I saw."`,
+         avoidant:`Truly taking someone's perspective means letting them affect you, which can feel like losing your footing — so you may stay in your own frame and call it being principled. Notice if "agree to disagree" is sometimes just a polite exit from being changed. Letting someone reach you isn't weakness; it's the whole point of being close to them.`,
+         fearful:`You may flip between absorbing someone's view completely and slamming the door on it as a threat. Both keep you from the real thing — being moved while staying yourself. Aim for the middle: let their experience in, weigh it, decide. You don't have to either disappear into it or defend against it.`}},
+
+  {ask:`When you hurt someone without meaning to — good intentions, bad landing — how much does the impact matter to you next to the fact that you didn't mean it?`,
+   good:`They can hold "I didn't mean to" and "I still hurt you" at the same time, and they let the second one matter. Someone who tends to your impact even when their intent was pure is someone you can be honest with about how things land — so the small wounds get cleaned instead of left to fester into something neither of you can name later.`,
+   know:`Good intentions become a shield: "I didn't mean it, so you can't be hurt." Your experience gets overruled by their version of their own heart. It feels reasonable in the moment, but the cost is steep — you slowly learn that your hurt only counts when they agree they caused it, which means most of the time it doesn't count at all.`,
+   lens:{secure:`You naturally own your impact, so you may extend a lot of grace to someone who hides behind intent — filling in the accountability they didn't actually offer. Don't fill it in. "I didn't mean to" is the start of a repair, not the end of one. Watch whether they ever get to "and I'm sorry it landed that way," or whether the good intention is where it always stops.`,
+         anxious:`When someone insists they didn't mean it, you may rush to agree and bury your own hurt to keep the peace — "you're right, it's fine, I overreacted." Slow down. Their intent and your impact are both real, and yours doesn't evaporate because theirs was good. You're allowed to have been hurt by someone who loves you.`,
+         avoidant:`This points back at you, too — "I didn't mean it" is a clean exit from the discomfort of having hurt someone, and you may reach for it. Notice if you'd rather defend your intent than sit with their hurt. Tending to impact is uncomfortable precisely because it asks you to stay; that staying is what makes it count.`,
+         fearful:`Being told you hurt someone can flood you — into all-out defense ("I didn't MEAN to!") or total collapse ("I ruin everything"). Neither lets you do the simple thing: hear that it landed, and say you're sorry. The middle is calmer than both extremes, and it's where actual repair lives.`}},
+
+  {ask:`How easily can you understand someone whose choices you'd never make — different politics, a totally different life? Can you get why they do what they do, even when you disagree?`,
+   good:`They can inhabit a worldview they don't share without needing to demolish it — they can explain why a reasonable person might land somewhere they never would. That flexibility matters at home more than you'd think: the person who can hold "you see it completely differently and you're still worth understanding" is the one who can stay close to you across all the ways you'll inevitably differ over a lifetime.`,
+   know:`Anyone who disagrees is stupid, brainwashed, or bad. The empathy only reaches people who already think and live like they do. It can feel like conviction, even integrity — but someone whose understanding stops at the edge of their own tribe will, the day you fall outside it on something that matters, aim that same contempt at you.`,
+   lens:{secure:`You can usually hold difference without it threatening you, so you may underrate how much someone's contempt-for-the-other-side will eventually find its way to you. Watch where their empathy runs out. The boundary of a person's compassion is a real edge, and sooner or later you'll stand on the wrong side of it about something.`,
+         anxious:`You may be so good at understanding everyone's side that you struggle to hold your own — bending toward whatever view keeps you connected. Empathy for others shouldn't cost you your own position. Notice if "I see where they're coming from" has quietly erased where you're coming from.`,
+         avoidant:`You might keep a cool distance from everyone's worldview, yours included, and call it open-mindedness — when it's really staying un-invested so no one can reach you. Real empathy across difference means letting someone's reasons actually touch you. Detachment isn't the same as understanding.`,
+         fearful:`Difference can feel dangerous to you — a sign you're not safe, not on the same team — so you may swing between over-accommodating a view and treating it as proof they'll hurt you. Most differences aren't threats. Practice staying curious about the gap instead of reading every one as the beginning of the end.`}},
+
+  {ask:`When someone needs you emotionally at a genuinely bad time — you're exhausted, slammed, stressed — what happens to your patience? Be honest.`,
+   good:`They can admit it's hard and still find a way to show up — or to say "I've got nothing left right now, but I'm here, give me an hour." Empathy that survives being inconvenient is the only kind you can build a life on, because life is mostly inconvenient timing. Someone who can stretch toward you when they're depleted will still be reaching for you in the hard years, not just the easy ones.`,
+   know:`The warmth vanishes the second it costs them anything — and you learn to need them only when they have the bandwidth, which is to say, when you don't really need them. Empathy that's only available when convenient isn't unreliable by accident; it's empathy with conditions. And the moments you'll need someone most are exactly the inconvenient ones.`,
+   lens:{secure:`You tend to show up even when you're tired, so you may keep pouring out and assume it'll come back around. Track whether it does. Being the one who always has something left, for a partner who never seems to when it's your turn, is how generous people quietly end up empty in plain sight.`,
+         anxious:`You may give past your own limit — show up depleted, abandon your own needs entirely — because saying "I can't right now" feels like risking the relationship. Notice that. Empathy that requires you to have no needs of your own isn't sustainable, and a partner worth keeping wants to know when your tank is empty too.`,
+         avoidant:`When someone needs you at a bad time, your instinct may be to withdraw — "I can't deal with this right now" as a door rather than a pause. Notice the difference between honestly needing a beat and using your stress as a reason to disappear. "I'm here, just give me an hour" keeps the door open; vanishing closes it.`,
+         fearful:`Under pressure you may lurch between over-giving and total shutdown — pouring out until you resent it, then withdrawing hard. Both leave the other person guessing. The steadier move is the honest one: "I'm running low, here's what I can give right now." Small, truthful, reliable beats heroic-then-gone.`}},
+
+  {ask:`How curious are you, really, about what's going on inside the people closest to you? Do you ask — or mostly figure you already know?`,
+   good:`They stay curious about the people they love — they ask, they update their picture of you, they don't assume the version of you from a year ago is still current. Being someone's ongoing curiosity instead of a settled fact is what keeps love from going stale: you get to keep becoming, and they keep wanting to know who you're becoming.`,
+   know:`They figured you out early and stopped looking — you've become a known quantity, a fixed character in their story. It can feel like security at first, being so "understood." But people who stop being curious about you stop actually seeing you, and one day you realize the person they love is a slightly outdated version you've quietly outgrown.`,
+   lens:{secure:`You stay curious about others without effort, so you may not notice when someone's stopped being curious about you — you're busy asking them things. Notice whether the curiosity runs both ways. A relationship where only one person keeps wondering about the other isn't intimacy; it's an interview that never ends.`,
+         anxious:`You may be endlessly curious about them — sometimes genuine interest, sometimes anxious monitoring for clues about where you stand. Check which it is. And notice if you're so focused on knowing them that you've made yourself easy to know but hard to wonder about. You're allowed to be someone worth getting curious about, too.`,
+         avoidant:`Real curiosity about someone's inner world invites closeness, which can feel like more than you want — so you may settle for the surface and call it respecting their privacy. Notice if "I don't want to pry" is keeping you safely on the outside. Asking is how you let someone in; assuming is how you keep the door shut without admitting it.`,
+         fearful:`Your curiosity can spike into interrogation — needing to know everything to feel safe — then collapse into not wanting to know at all, in case you find something that hurts. Neither is the warm, open wondering that builds closeness. Aim for interested, not investigative; curious, not braced.`}},
+
+  {ask:`When a friend's going through something hard, can you keep it about them — or do you notice yourself steering it back to your own story?`,
+   good:`They can hold the spotlight on someone else without needing to climb into it. They'll share their own experience to connect, not to take over — and they can tell when you need to be heard rather than matched. Being with someone who can make it about you when it needs to be about you is rarer than it sounds, and it's the difference between feeling accompanied and feeling upstaged.`,
+   know:`Every hard thing you bring becomes a doorway to their own, bigger version of it. It's usually not malice — often it's how they try to relate — but the effect is that you never quite get the floor. Over years, you stop bringing things at all, because some quiet part of you has learned your struggles are mostly a prompt for theirs.`,
+   lens:{secure:`You de-center easily, giving others the floor without keeping score — so you may not notice you rarely get it back. Watch the ratio over time. Always being the listener, never the listened-to, doesn't feel like a problem in any single conversation; it just slowly adds up to being unseen by someone who swears they know you.`,
+         anxious:`You may give away the floor so reflexively — "no no, tell me about you" — that you never take your turn, then feel quietly unseen and resentful. Notice the pattern. Making room for others is lovely; erasing yourself to keep them comfortable is something else. Your story deserves airtime in your own relationship.`,
+         avoidant:`Keeping the focus off yourself can be a way to stay hidden — you ask the questions, steer it toward them, and never have to be the one exposed. Notice if "I'm a good listener" is also a place to hide. Letting it be about you sometimes is part of letting someone actually know you.`,
+         fearful:`You may oscillate between disappearing into someone else's story and suddenly flooding the conversation with your own. The steady middle — taking your turn and giving theirs, trusting there's room for both — is the part that's hard for you, and the part that builds real mutual closeness.`}},
+
+  {ask:`When you're truly furious at someone you love, is there a line you won't cross — things you just won't say, even when part of you wants to wound them?`,
+   good:`Even at their angriest, there's a floor they won't go beneath — they won't aim for the soft spots you trusted them with, won't say the unforgivable thing just because it would land. That restraint is everything: it means the vulnerable parts of you stay safe even in the worst moment, and you never have to choose between being fully known and being protected.`,
+   know:`In anger, the gloves come off — your deepest insecurities, the things you confided, get picked up and used as weapons. Someone who weaponizes what you trusted them with is teaching you that closeness with them is dangerous, that anything you reveal can be turned against you later. You'll start holding back the tender things, and a relationship where you can't be vulnerable isn't really intimacy at all.`,
+   lens:{secure:`You hold the line in anger without much thought, so you may underestimate how much damage a partner who doesn't can do. One genuinely cruel thing said in fury — aimed exactly where it'll hurt — is worth more attention than a hundred calm reassurances. Watch who someone becomes at their worst, not only their best.`,
+         anxious:`Your fear is being abandoned, so under threat you may grasp, plead, or escalate to keep them from leaving — your version of crossing the line. And on the receiving end, a cruel thing said in anger can devastate you for weeks. Notice both. You deserve someone safe at their angriest, and you can practice fighting without that flailing terror, too.`,
+         avoidant:`Your version of the low blow is often the cold one — the cutting withdrawal, the contemptuous shutdown, the door that says "you don't matter enough to fight with." It can wound as deeply as anything shouted. Notice if you'd recognize that move in them because it's yours; the icy ones are easy to excuse as "at least I didn't yell."`,
+         fearful:`When you feel threatened, the urge to wound first — before they can wound you — can be overpowering. You may lash out precisely to push away the person you most want to hold onto. Notice the impulse before it acts. The person in front of you usually isn't the one from your past, and they don't have to pay that bill.`}},
+
+  {ask:`Do you tend to notice what the people you love need before they ask — or do you need to be told? Give me a real example.`,
+   good:`They pay enough attention to anticipate — the glass of water, the mood read and met, the thing handled before you knew to ask. And they can give you a concrete example, which means it's real and not just a flattering self-image. Being cared for like that, by someone who's actually watching, is one of the quietest and most underrated forms of love there is.`,
+   know:`Everything has to be requested, spelled out, sometimes asked for twice — and even then it can feel like a favor rather than care. It's not always selfishness; some people genuinely don't track that way. But love that only ever responds to explicit instructions starts to feel like management, and you'll tire of being the one who notices everything for both of you.`,
+   lens:{secure:`You probably anticipate others' needs naturally, so you may not clock how one-directional it's become — you're too busy noticing them. Watch whether anyone's anticipating yours. The person who quietly takes care of everyone is often the one no one thinks to take care of, precisely because they make it look effortless.`,
+         anxious:`You may over-anticipate — managing their every need as a way to earn your place and remove any reason for them to leave. Notice when care tips into anxious over-functioning. Real thoughtfulness comes from attention and overflow, not from fear, and you shouldn't have to earn love by becoming indispensable.`,
+         avoidant:`Anticipating someone's needs requires tuning into them closely, which can feel like more entanglement than you want — so you may default to "just tell me what you need" and call it fair. It is fair, but notice if it's also a way to stay a step removed. Sometimes the loving move is to watch closely enough that they don't have to ask.`,
+         fearful:`You may swing between hyper-anticipating someone's needs to lock in closeness and going totally oblivious when you're pulling away to protect yourself. The inconsistency can be disorienting for them. Steady, ordinary attentiveness — there on the normal days, not just the intense ones — is what actually builds trust over time.`}},
+
+  {ask:`How easy is it for you to let someone take care of you — to be the one who's falling apart, and let someone else show up for it?`,
+   good:`They can receive, not only give. They'll let you see them low, let you carry something for a change, without it bruising their pride. A relationship where care only flows one way isn't intimacy — it's a service. Someone who can let themselves be held is offering you the chance to actually matter to them, not just be useful to them.`,
+   know:`They're endlessly there for everyone and constitutionally unable to need anything back — always the strong one, the helper, the rock. It can look like strength, and underneath it's often a real wound: somewhere they learned that needing things gets you left. But the cost to you is real — you never get to give to them, never get to be the one who shows up, and a love you're not allowed to return slowly starts to feel like a locked door.`,
+   lens:{secure:`You can usually give and receive without much fuss, so you may not notice you've ended up with someone who only does the giving — and quietly cast you as the permanent patient, or the permanent helper. Watch whether the care actually moves both directions, or whether one of you got assigned a role.`,
+         anxious:`You may find it far easier to give than to receive, because giving feels like earning your place and receiving feels like exposure. Notice that. Letting someone take care of you — and trusting they won't hold it against you or vanish — is its own kind of brave, and you're allowed to need things without paying for them in advance.`,
+         avoidant:`This is close to the center of it for you. Being the one who needs something can feel almost unbearable, so you stay the capable one, the giver, the person who's fine. Notice what that costs you both. Letting someone show up for you isn't weakness or burden — it's the exact thing that lets them all the way in.`,
+         fearful:`You may lurch between refusing all help (needing no one feels safest) and suddenly needing everything at once (when the dam breaks). Both make it hard for someone to steadily care for you. Try being helped in small, ordinary ways — not as a test of whether they'll stay, just as practice in being held.`}},
+
+  {ask:`Think of a time someone really got you — saw exactly what you were feeling, without you having to explain it. What did they do, and what did it feel like?`,
+   good:`They can call the moment up and warm up just describing it — and in telling you, they're quietly handing you the instructions for how to reach them. This one's a gift in both directions: you learn exactly what makes them feel loved, and they get to feel, just from the remembering, what being truly seen is like.`,
+   know:`If they honestly can't think of a single time, go gentle — that's not a flag, it's a window. Some people were never really met growing up, and may not even know to want it. You can't undo that for them, but you might get to be, maybe for the first time, the person who actually sees them. That's a beautiful thing to get to be for someone.`,
+   lens:{secure:`You've likely felt this before, so you can recognize the real thing when it happens and offer it freely. Just make sure you're on the receiving end of it too, not only ever the one doing the seeing.`,
+         anxious:`If you've felt truly understood only rarely, you might light up at the smallest scrap of attention — so be gentle with yourself here. The real thing is calm and steady, not a spark you have to chase. You're allowed to hold out for someone who sees you on the ordinary days, not just the dramatic ones.`,
+         avoidant:`Letting someone all the way in can feel like a lot, so you may wave this one off — "I don't really need that kind of thing." Notice the want tucked under the deflection. Being known isn't the danger your nervous system insists it is; it might be the thing you've quietly missed most.`,
+         fearful:`Being deeply seen is the thing you ache for and the thing that scares you most, both at once. Let yourself answer this one honestly — not as a test of them, just as a wish you're allowed to have. The people who truly see you don't all turn into the people who hurt you.`}},
+];
+
+const CATEGORIES = [
+  { eyebrow:"Category 01 · Conflict & Repair",
+    title:`How someone <em>fights</em> — and whether they come <em>back</em>.`,
+    intro:`Every couple fights — the happy ones included; honest friction is part of how love works, not a sign something's broken. How two people fight — and whether they find their way back — tells you more than almost anything else. Anyone's easy to love when things are good; this is about what happens when they're not. None of it is about who's a good or bad person. We all learned how to handle conflict somewhere, and we all have our defaults — the point is just to see each other's clearly, so you both know what the hard days would really feel like.`,
+    nav:"Conflict & Repair", cards:CARDS },
+  { eyebrow:"Category 02 · Attachment & Consistency",
+    title:`Whether who they <em>are</em> stays the <em>same</em>.`,
+    intro:`Nobody's the same at month six as they were on the first date — we've all got patterns, hangups, a little baggage we carry in. That's not a problem; but pretending it isn't there is. This section is about both of you getting honest about how you each do steadiness, closeness, and showing up — not to pass or fail anyone, but so you both actually know what you're walking into.`,
+    nav:"Attachment & Consistency", cards:CARDS2 },
+  { eyebrow:"Category 03 · Honesty & Integrity",
+    title:`Whether the <em>truth</em> holds when it <em>costs</em> something.`,
+    intro:`What you're really after is someone whose word you can lean your weight on — who you never have to keep checking up on, who you simply get to believe. This is about how each of you handles the truth when it's genuinely hard to tell it. A kind silence isn't a lie — not telling someone they look terrible was never dishonest — but getting to believe what someone says, instead of playing detective, is the ground a whole life gets built on.`,
+    nav:"Honesty & Integrity", cards:CARDS3 },
+  { eyebrow:"Category 04 · Empathy & Attunement",
+    title:`Whether they can <em>feel</em> their way into a world that isn't <em>theirs</em>.`,
+    intro:`The deepest thing you can offer another person is to actually feel what it's like to be them — and to have them do the same for you. This section is about that: whether each of you can step into the other's experience, catch when something's off, and let it move you. Some of us run warm and some of us had to learn it late, and either is okay. What you're after isn't a mind-reader — it's someone who keeps trying to understand you, and who lets your inner world matter as much as their own.`,
+    nav:"Empathy & Attunement", cards:CARDS4 },
+];
+let activeCat = 0;
+
+/* ---------------- state + storage (guarded) ---------------- */
+let viewLens = 'all';
+try{ const s = localStorage.getItem('ce_lens'); if(s) viewLens = s; }catch(e){}
+let quizOutcome = null;
+
+const LENS_LABEL = {secure:"Secure",anxious:"Anxious",avoidant:"Avoidant",fearful:"Anxious-avoidant"};
+const LENS_ORDER = ['secure','anxious','avoidant','fearful'];
+
+function setLens(l){
+  viewLens = l;
+  try{ localStorage.setItem('ce_lens', l); }catch(e){}
+  syncToggle();
+  renderCards();
+}
+function syncToggle(){
+  document.querySelectorAll('#lensToggle .t-btn').forEach(b=>{
+    b.classList.toggle('active', b.dataset.l === viewLens);
+  });
+  const hint = document.getElementById('lensHint');
+  hint.textContent = viewLens === 'all'
+    ? "Showing all four leans below. Tap your own — or take the quiz — to see only yours."
+    : "Showing your " + LENS_LABEL[viewLens].toLowerCase() + " lens at the bottom of each question.";
+}
+
+function lensLineFor(card){
+  const has = l => card.lens && card.lens[l];
+  if(viewLens === 'all'){
+    const lines = LENS_ORDER.filter(has).map(l =>
+      `<div class="lens-row"><span class="lt-${l}">If you're ${LENS_LABEL[l].toLowerCase()}</span> — ${card.lens[l]}</div>`
+    );
+    if(!lines.length) return '<span class="lens-pending">Nothing extra to watch for here — just listen honestly.</span>';
+    return lines.join('');
+  }
+  if(has(viewLens)) return card.lens[viewLens];
+  return '<span class="lens-pending">Nothing extra to watch for here as a '+LENS_LABEL[viewLens].toLowerCase()+' read — just listen honestly.</span>';
+}
+
+function renderCatNav(){
+  document.getElementById('catNav').innerHTML = CATEGORIES.map((c,i)=>
+    `<button class="cat-pill${i===activeCat?' active':''}" data-cat="${i}"><span class="pn">${String(i+1).padStart(2,'0')}</span>${c.nav}</button>`
+  ).join('');
+  document.querySelectorAll('#catNav .cat-pill').forEach(b=>{
+    b.onclick = ()=>{ activeCat=+b.dataset.cat; renderCatNav(); renderCatHead(); renderCards(); window.scrollTo({top:0,behavior:'smooth'}); };
+  });
+}
+function renderCatHead(){
+  const c = CATEGORIES[activeCat];
+  document.getElementById('catHead').innerHTML =
+    `<div class="cat-eyebrow">${c.eyebrow}</div><h1 class="cat-title">${c.title}</h1><p class="cat-intro">${c.intro}</p>`;
+}
+
+function renderCards(){
+  const root = document.getElementById('cards');
+  root.innerHTML = CATEGORIES[activeCat].cards.map((c,i)=>`
+    <div class="card">
+      <div class="num">No. ${String(i+1).padStart(2,'0')}</div>
+      <div class="ask">${c.ask}</div>
+      <div class="layer"><div class="tag tag-good">Good sign</div><div class="body">${c.good}</div></div>
+      <div class="layer"><div class="tag tag-know">Worth knowing</div><div class="body">${c.know}</div></div>
+      <div class="layer lens-layer"><div class="tag tag-lens">Your lens</div><div class="body">${lensLineFor(c)}</div></div>
+    </div>`).join('');
+}
+
+/* ---------------- quiz flow ---------------- */
+let qIdx = 0;
+const tally = {secure:0,anxious:0,avoidant:0};
+const KEYS = ['secure','anxious','avoidant'];
+
+function openQuiz(){
+  qIdx=0; tally.secure=0; tally.anxious=0; tally.avoidant=0;
+  document.getElementById('quizResult').classList.remove('show');
+  document.getElementById('quizQuestions').style.display='block';
+  document.getElementById('overlay').classList.add('open');
+  renderQ();
+}
+function closeQuiz(){ document.getElementById('overlay').classList.remove('open'); }
+
+function renderQ(){
+  const item = QUIZ[qIdx];
+  document.getElementById('progBar').style.width = ((qIdx)/QUIZ.length*100)+'%';
+  document.getElementById('qSlot').innerHTML =
+    `<div class="q-text">${item.q}</div>` +
+    item.a.map((opt,k)=>`<button class="opt" data-k="${k}">${opt.replace(/\s*\((secure|anxious|avoidant)\)\s*$/,'')}</button>`).join('');
+  document.querySelectorAll('#qSlot .opt').forEach(btn=>{
+    btn.onclick=()=>{ tally[KEYS[+btn.dataset.k]]++; next(); };
+  });
+}
+function next(){
+  qIdx++;
+  if(qIdx<QUIZ.length){ renderQ(); }
+  else{ finish(); }
+}
+function finish(){
+  document.getElementById('progBar').style.width='100%';
+  let best;
+  // strong on BOTH anxious and avoidant => anxious-avoidant (fearful)
+  if(tally.anxious>=2 && tally.avoidant>=2){
+    best='fearful';
+  }else{
+    // otherwise max count; ties resolve toward the more actionable (non-secure) lean
+    best='secure'; let bestN=-1;
+    ['anxious','avoidant','secure'].forEach(k=>{ if(tally[k]>bestN){bestN=tally[k];best=k;} });
+  }
+  quizOutcome=best;
+  document.getElementById('resTitle').textContent = RESULTS[best].title;
+  document.getElementById('resBody').textContent = RESULTS[best].body;
+  document.getElementById('quizQuestions').style.display='none';
+  document.getElementById('quizResult').classList.add('show');
+}
+
+/* ---------------- wire up ---------------- */
+document.getElementById('lensBtn').onclick = openQuiz;
+document.getElementById('quizClose').onclick = closeQuiz;
+document.getElementById('resDone').onclick = ()=>{ if(quizOutcome) setLens(quizOutcome); closeQuiz(); };
+document.getElementById('resRetake').onclick = openQuiz;
+document.querySelectorAll('#lensToggle .t-btn').forEach(b=>{ b.onclick = ()=> setLens(b.dataset.l); });
+document.getElementById('overlay').onclick = (e)=>{ if(e.target.id==='overlay') closeQuiz(); };
+
+syncToggle();
+renderCatNav();
+renderCatHead();
+renderCards();
+</script>
+</body>
+</html>
