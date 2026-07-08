@@ -1650,12 +1650,16 @@ const PUA_ITEMS = [
  {ph:0, text:`Stories arrive polished — practiced beats, rehearsed punchlines, and a quick glance to check whether the line landed.`},
  {ph:0, text:`The evening is steered — topics change when they change them, moments escalate on their clock, and you feel more like an audience than a participant.`},
  {ph:0, heavy:1, text:`Touch grows on a schedule — each one slightly bigger than the last, testing what you'll allow, whatever the moment actually called for.`},
+ {ph:0, text:`The date keeps moving — another venue, somewhere quieter, one more stop, drifting toward his place — and every move makes the night feel longer and you more invested.`},
  {ph:0, text:`Word-pictures and "imagine" games keep aiming at your feelings — and you catch yourself going pleasantly foggy instead of sharply engaged.`},
  {ph:0, text:`Compliments carry a hook — a sting folded into the praise that leaves you reaching to re-earn approval you never lost.`},
+ {ph:0, text:`You keep getting playfully challenged to prove yourself — "convince me," "so what makes you different" — small hoops, and you notice yourself jumping through them.`},
  {ph:0, text:`Scarcity is staged — the time limit that never ends the date, the theatrically busy phone, the stories where other women keep wanting them.`},
+ {ph:0, heavy:1, text:`Your drink pace stops being yours — rounds you didn't ask for, a glass that never empties, teasing when you slow down.`},
  {ph:0, heavy:1, text:`Warmth switches on and off within a single evening — and your leaning in is what switches it back on.`},
  {ph:0, text:`Your specifics don't register — nothing you share gets picked up or circled back to. The whole show would run the same on anyone.`},
  {ph:0, text:`Instant depth — "I've never told anyone this," "I feel like I've known you forever" — inside the first hour.`},
+ {ph:0, text:`An instant "us" gets built — inside jokes minted in hour one, us-versus-the-room framing, "everyone here is boring except us" — a bubble that makes stepping back feel like betraying something that doesn't exist yet.`},
  {ph:1, text:`Attention arrives in unpredictable bursts — a flood, then silence, then the warm return timed to the moment you start to detach.`},
  {ph:1, text:`You're auditioning — managing their interest level like a job, proving yourself to someone you only just met.`},
  {ph:1, heavy:1, text:`When you slow the pace or decline a small escalation, the routine resets and resumes — the same move retried, the flicker of irritation smoothed over.`},
@@ -1686,7 +1690,7 @@ function puaResultHTML(){
     <ul>${li(pats)}</ul>
     <p>You don't owe a stranger an audition, and attraction that needs you off-balance to work is not going anywhere good. Slow everything way down, or step out — and notice, from a little distance, how fast the show finds a new seat to fill. If you keep seeing them anyway, take the longer look next door: the dark triad audit watches these same instincts over months.</p></div>`;
   }
-  if(P>=1 || O>=4){
+  if(P>=1 || O>=5){
     return `<div class="dk-res" id="puaRes"><div class="dr-band">Worth watching.</div>
     <p>Not a verdict — a few live wires across ${seen} observed items:</p>
     ${pats.length?`<p style="margin-bottom:2px"><b>Marked as a pattern:</b></p><ul>${li(pats)}</ul>`:``}
@@ -1716,7 +1720,7 @@ function puaModuleHTML(){
       });
     });
     body = `<div class="cat-eyebrow">Protection · Field audit</div><h1 class="cat-title">Mark only what you've <em>seen</em>.</h1>
-      <p class="cat-intro">Twelve observations from the first few dates. Nothing to provoke, no test to run yet — just record what actually happened, and be honest about what you couldn't see. And remember: <em>once or twice is what being human looks like</em> — polished stories and confident touch exist innocently. The audit listens for the system, not the moment. This stays on your phone.</p>
+      <p class="cat-intro">Observations from the first few dates. Nothing to provoke, no test to run yet — just record what actually happened, and be honest about what you couldn't see. And remember: <em>once or twice is what being human looks like</em> — polished stories and confident touch exist innocently. The audit listens for the system, not the moment. This stays on your phone.</p>
       ${items}
       <button class="dk-go" onclick="readPua()">Read the pattern</button>
       ${puaShowRes ? puaResultHTML() : ``}
