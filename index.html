@@ -1668,6 +1668,7 @@ const PUA_ITEMS = [
  {ph:1, text:`Long, feeling-drenched messages or voice notes arrive late at night — vivid, dreamy, aimed at a tired brain — and you notice yourself drifting into them rather than reading them.`},
  {ph:1, text:`You're auditioning — managing their interest level like a job, proving yourself to someone you only just met.`},
  {ph:1, heavy:1, text:`When you slow the pace or decline a small escalation, the routine resets and resumes — the same move retried, the flicker of irritation smoothed over.`},
+ {ph:1, text:`And the sum of it all lives in your body — during: buzzing but braced, performing, never quite at ease. After: drained instead of warmed, foggy instead of clear, already working out how to win the next one. Real connection leaves you fuller than it found you. A routine leaves you spent — and somehow still wanting more.`},
 ];
 const PUA_PHASES = [`During the date`,`Between dates — and inside you`];
 let PUAANS = store('ce_pua', {});
@@ -1729,7 +1730,7 @@ function puaModuleHTML(){
       ${items}
       <button class="dk-go" onclick="readPua()">Read the pattern</button>
       ${puaShowRes ? puaResultHTML() : ``}
-      <button class="dk-reset" onclick="resetPua()">Start over — clear my answers</button>`;
+      <button onclick="resetPua()" style="display:block;margin:12px auto 0;background:none;border:none;color:var(--ink-soft);font-family:'Inter',sans-serif;font-size:.8rem;text-decoration:underline;cursor:pointer">Start over</button>`;
   }
   return `<button class="back-link" onclick="backToHub()">&larr; All bonus</button>`
     + listHead('How to spot a pick-up artist','On the first few dates — recognition, not paranoia.')
