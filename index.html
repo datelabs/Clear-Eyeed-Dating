@@ -1762,6 +1762,112 @@ function gfModuleHTML(){
     <button onclick="resetGf()" style="display:block;margin:12px auto 0;background:none;border:none;color:var(--ink-soft);font-family:'Inter',sans-serif;font-size:.8rem;text-decoration:underline;cursor:pointer">Start over</button>`;
 }
 
+const FS_ITEMS = [
+ {ax:'s', text:`Your shoulders drop when they arrive — some part of you unclenches without being told to.`},
+ {ax:'s', text:`You can be quiet together without scrambling to fill it.`},
+ {ax:'s', text:`After time with them, you feel rested — fuller than they found you, not spent.`},
+ {ax:'s', text:`You say the unpolished thing — the half-formed thought, the unflattering feeling — without rehearsing it first.`},
+ {ax:'s', text:`Your sleep, appetite, and focus stay steady around this person — the rest of your life keeps working.`},
+ {ax:'s', text:`You can disagree with them without your heart rate doing anything dramatic.`},
+ {ax:'s', text:`Around them you feel more like yourself — not a managed, edited version.`},
+ {ax:'s', text:`When they reach for you, your body moves toward them — no flinch, no bracing, no counting.`},
+ {ax:'b', text:`You check your phone with a small knot in your stomach — relief or a drop, depending on what's there.`},
+ {ax:'b', text:`You rehearse conversations with them before you have them.`},
+ {ax:'b', text:`You read their mood from the doorway — checking the weather before you decide how to be.`},
+ {ax:'b', text:`Your stomach tightens when their name pops up.`},
+ {ax:'b', text:`After time together you're tired in a way that isn't sleepy — managed, performed, spent.`},
+ {ax:'b', text:`Small parts of you have gone quiet around them — opinions, needs, feelings — and you never exactly decided that.`},
+ {ax:'b', text:`You feel faintly on probation — one wrong move from losing something.`},
+ {ax:'b', text:`Your body relaxes a little when plans with them fall through.`},
+];
+const FS_CHIPS = [`Hard to say`,`Rarely`,`Sometimes`,`Usually`];
+let FSDATA = store('ce_fs', {target:null, ans:{}});
+let fsShowRes = false;
+
+function fsSetTarget(k){ FSDATA.target=k; try{ save('ce_fs', FSDATA); }catch(e){} renderBonus(); window.scrollTo({top:0,behavior:'smooth'}); }
+function fsChangeTarget(){ if(Object.keys(FSDATA.ans||{}).length && !confirm('Switch who this is about? Your current answers will be cleared.')) return; FSDATA={target:null, ans:{}}; try{ save('ce_fs', FSDATA); }catch(e){} fsShowRes=false; renderBonus(); }
+function setFsAns(i,v){ FSDATA.ans[i]=v; try{ save('ce_fs', FSDATA); }catch(e){} fsShowRes=false; renderBonus(); }
+function readFs(){ fsShowRes=true; renderBonus(); const el=document.getElementById('fsRes'); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); }
+function resetFs(){ if(!confirm('Clear all your answers and start over?')) return; FSDATA.ans={}; try{ save('ce_fs', FSDATA); }catch(e){} fsShowRes=false; renderBonus(); window.scrollTo({top:0,behavior:'smooth'}); }
+
+function fsResultHTML(){
+  const ans=FSDATA.ans||{};
+  let sS=0,sN=0,bS=0,bN=0;
+  FS_ITEMS.forEach((it,i)=>{
+    const v=ans[i]; if(!(v>=1)) return;
+    const p = v===3?2:(v===2?1:0);
+    if(it.ax==='s'){ sN++; sS+=p; } else { bN++; bS+=p; }
+  });
+  const seen=sN+bN;
+  const t = GF_TARGETS.find(t=>t.k===FSDATA.target) || GF_TARGETS[0];
+  if(seen<10) return `<div class="dk-res" id="fsRes"><div class="dr-band">Too early to read.</div><p>You've only been able to answer ${seen} item${seen===1?'':'s'} so far — and with body signals, "hard to say" is often the honest truth early on. Spend a little more time noticing, then come back. Your body is already collecting the data; this just organizes it.</p></div>`;
+  const sPct = sN? Math.round(100*sS/(2*sN)) : 0;
+  const bPct = bN? Math.round(100*bS/(2*bN)) : 0;
+  const sHigh = sPct>=55, bHigh = bPct>=40;
+  const bars = `<div class="blend-row"><div class="br-top"><span class="br-name">Your body settles</span><span class="br-pct">${sPct}%</span></div><div class="blend-bar"><i style="width:${sPct}%"></i></div></div>
+  <div class="blend-row"><div class="br-top"><span class="br-name">Your body braces</span><span class="br-pct">${bPct}%</span></div><div class="blend-bar"><i style="width:${bPct}%;background:linear-gradient(90deg,var(--gold-soft),var(--wine))"></i></div></div>
+  <p style="font-size:.8rem;color:var(--ink-soft);margin-top:6px">Bracing counts at a lower bar than settling — a body that braces four days out of ten is not at rest.</p>`;
+  let head, body;
+  if(sHigh && !bHigh){
+    head=`Your body says safe.`;
+    body=`Around ${t.h}, your system settles and isn't running a guard shift — and that's not a small thing. Felt safety is the ground state love is supposed to grow in, and it's very hard to fake for long: your shoulders and your sleep don't perform. Pair this with the green-flag audit — a body that settles <em>plus</em> behavior that stays steady is the whole green light.`;
+  } else if(sHigh && bHigh){
+    head=`Both at once — settled and braced.`;
+    body=`Your body relaxes around ${t.h} and keeps a guard posted anyway. Two common reasons, and they need different responses. One: their warmth may be intermittent — on-off enough that your body never fully trusts the on. Two: the alarm may be older than this person — wiring that fires around anyone who starts to matter. How to tell them apart: watch what the brace <em>tracks</em>. If it spikes after their actual behavior — the cold snap, the jab, the vanish — it's data about them; check the other two audits. If it spikes in the gaps, when nothing actually happened, it's more likely your history talking — workable, but yours.`;
+  } else if(!sHigh && bHigh){
+    head=`Your body is bracing.`;
+    body=`Around ${t.h}, your system is spending its time managed, monitored, and rehearsed — and mostly not getting to rest. Hold two truths here. Some alarms are miscalibrated by history, so this isn't automatically a verdict on them. And yet: even if part of the alarm is your own wiring, a relationship where your body never quiets isn't working yet — that's true no matter whose alarm it is. If the bracing tracks their behavior, believe it, and let the dark-triad and green-flag audits weigh in. If it doesn't, the work is yours, and it deserves real support either way.`;
+  } else {
+    head=`Flat — not alarmed, not landing.`;
+    body=`Around ${t.h}, your body isn't bracing — but it isn't settling either. Nothing here says danger; nothing says home. That can mean it's simply early, or that you're guarded, or that this connection hasn't reached your body yet. No verdict — but if this is months in and the needle still hasn't moved, the stillness itself is information. Bodies vote, eventually, one way or the other.`;
+  }
+  // attachment-lens interpretation
+  let lensLine='';
+  if(typeof viewLens==='string' && viewLens){
+    if(viewLens==='anxious') lensLine=`Through your lens: an anxious system can run the brace signals off <em>ambiguity itself</em> — the unanswered text, the quiet afternoon — even with a genuinely steady person. The tell is timing. Alarm that follows their behavior is about them. Alarm that fills a silence where nothing happened is usually the old scanner — real, but yours.`;
+    else if(viewLens==='avoidant') lensLine=`Through your lens: an avoidant system can flatten the settle signals and fire relief-when-plans-cancel around perfectly good closeness — deactivation feels like "meh" from the inside. Check what the flatness follows: if the best, closest weekends produce the strongest pull for distance, that's your wiring doing the reading, not their failing.`;
+    else if(viewLens==='fearful') lensLine=`Through your lens: both of your alarms can fire around the same person, so this read may genuinely swing week to week — take it more than once and look at the average. And anchor on behavior: when the brace kicked in, what were they actually <em>doing</em>? That question separates their pattern from your weather.`;
+    else lensLine=`Through your lens: a secure system is usually a well-calibrated instrument — this read deserves real weight. Verify it against behavior with the green-flag audit, then trust yourself.`;
+    lensLine=`<p style="margin-top:12px">${lensLine}</p>`;
+  } else {
+    lensLine=`<p style="margin-top:12px" class="cat-intro" >One sharpener: this read interprets best through your attachment lens — anxious and avoidant wiring miscalibrate body-signals in opposite ways. Take the Attachment lens quiz and come back; the result will speak to your wiring specifically.</p>`;
+  }
+  return `<div class="dk-res" id="fsRes"><div class="dr-band">${head}</div>
+  <p style="font-size:.85rem;color:var(--ink-soft)">This is what your own body has been reporting about ${t.h} — organized, not judged.</p>
+  <div style="margin-top:14px">${bars}</div>
+  <p style="margin-top:14px">${body}</p>
+  ${lensLine}</div>`;
+}
+
+function fsModuleHTML(){
+  const back = `<button class="back-link" onclick="backToHub()">&larr; All bonus</button>`;
+  const head = listHead('Felt-safety read','What your nervous system already knows.');
+  if(!FSDATA.target){
+    const btns = GF_TARGETS.map(t=>`<div class="dk-item" style="cursor:pointer;text-align:center;font-weight:600" onclick="fsSetTarget('${t.k}')">${t.label}</div>`).join('');
+    return back + head + `<div class="cat-eyebrow" style="margin-top:14px">Before you start</div>
+      <h1 class="cat-title">Who is this read <em>about</em>?</h1>
+      <p class="cat-intro">Your body runs its own read on every person in your life — faster than your thoughts, and harder to fool. It just files the report somewhere you rarely check: your shoulders, your stomach, your sleep, the small knot when a name pops up. This organizes that report. Pick who it's about.</p>${btns}`;
+  }
+  const t = GF_TARGETS.find(x=>x.k===FSDATA.target) || GF_TARGETS[0];
+  let items='';
+  const groups=[{ax:'s',label:'The settle signals'},{ax:'b',label:'The brace signals'}];
+  groups.forEach(g=>{
+    items += `<div class="group-label" style="margin-top:26px">${g.label}</div>`;
+    FS_ITEMS.forEach((it,i)=>{
+      if(it.ax!==g.ax) return;
+      const chips = FS_CHIPS.map((c,v)=>`<button class="dk-chip${FSDATA.ans[i]===v?' on':''}" onclick="setFsAns(${i},${v})">${c}</button>`).join('');
+      items += `<div class="dk-item"><div class="dk-q">${it.text}</div><div class="dk-chips">${chips}</div></div>`;
+    });
+  });
+  return back + head + `<div class="cat-eyebrow" style="margin-top:14px">About: ${t.label} &middot; <span style="text-decoration:underline;cursor:pointer" onclick="fsChangeTarget()">change</span></div>
+    <h1 class="cat-title">Answer with your <em>body</em>, not your hopes.</h1>
+    <p class="cat-intro">No analyzing, no fairness, no "but they mean well" — that's for the other audits. This one only wants what your body actually does: the unclench or the knot, the rest or the rehearsing. "Hard to say" is a real answer. Notice for a week if you need to, then report.</p>
+    ${items}
+    <button class="dk-go" onclick="readFs()">Read the signal</button>
+    ${fsShowRes ? fsResultHTML() : ``}
+    <button onclick="resetFs()" style="display:block;margin:12px auto 0;background:none;border:none;color:var(--ink-soft);font-family:'Inter',sans-serif;font-size:.8rem;text-decoration:underline;cursor:pointer">Start over</button>`;
+}
+
 const PUA_GUIDE = {
  eyebrow:`Protection · The first few dates`,
  title:`If it feels like magic, check for the <em>machinery</em>.`,
@@ -1981,9 +2087,15 @@ function bonusHubHTML(){
        <div class="bc-s">The opposite of red-flag hunting: is the good stuff actually here, consistently? Pick who it's about, rate what you've genuinely seen across all seven areas, and get your read back — strengths, gaps, and the signs that matter most.</div></div>
        <div class="bc-arrow">&#8250;</div>
      </div>
+     <div class="bonus-card" onclick="openModule('fs')">
+       <div class="bc-ic">&#8776;</div>
+       <div><div class="bc-t">Felt-safety read</div>
+       <div class="bc-s">Your body runs its own read on every person — this organizes it. Rate what your nervous system actually does around them: the settle signals, the brace signals, and what the mix means through your attachment lens.</div></div>
+       <div class="bc-arrow">&#8250;</div>
+     </div>
 ${attachPanelHTML()}
 ${darkPanelHTML()}
-     <p class="cat-intro" style="margin-top:12px;font-size:.92rem">More quizzes are on the way — a felt-safety read, and &ldquo;feeling weird and don't know what to do.&rdquo;</p>`;
+     <p class="cat-intro" style="margin-top:12px;font-size:.92rem">One more is on the way — &ldquo;feeling weird and don't know what to do.&rdquo;</p>`;
 }
 
 function mbtiModuleHTML(){
@@ -2021,6 +2133,7 @@ function renderBonus(){
                : bonusModule==='dark' ? darkModuleHTML()
                : bonusModule==='pua' ? puaModuleHTML()
                : bonusModule==='gf' ? gfModuleHTML()
+               : bonusModule==='fs' ? fsModuleHTML()
                : bonusHubHTML();
 }
 function openModule(m){ bonusModule=m; renderBonus(); window.scrollTo({top:0,behavior:'smooth'}); }
