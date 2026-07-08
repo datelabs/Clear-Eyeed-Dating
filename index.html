@@ -1672,12 +1672,21 @@ function setGfAns(i,v){ GFDATA.ans[i]=v; try{ save('ce_gf2', GFDATA); }catch(e){
 function readGf(){ gfShowRes=true; renderBonus(); const el=document.getElementById('gfRes'); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); }
 function resetGf(){ if(!confirm('Clear all your answers and start over?')) return; GFDATA.ans={}; try{ save('ce_gf2', GFDATA); }catch(e){} gfShowRes=false; renderBonus(); window.scrollTo({top:0,behavior:'smooth'}); }
 
+const GF_WHY = [
+ `steadiness is the floor everything else stands on`,
+ `how someone handles being wrong decides what every future conflict will feel like`,
+ `you can't build on words you have to keep checking`,
+ `being understood is the daily texture of a relationship`,
+ `it decides whether you get to stay a whole person`,
+ `character that runs on morals rather than audience is the part that doesn't change when circumstances do`
+];
 function gfResultHTML(){
   const ans=GFDATA.ans||{};
+  const pts = v => v===3?2:(v===2?0.5:0);
   let seen=0, score=0; const strong=[], swings=[], missing=[];
   GF_ITEMS.forEach((it,i)=>{
     const v=ans[i];
-    if(v>=1){ seen++; score += (v===3?2:(v===2?1:0)); }
+    if(v>=1){ seen++; score += pts(v); }
     if(v===3) strong.push(it.text);
     if(v===2) swings.push(it.text);
     if(v===1) missing.push(it.text);
@@ -1685,28 +1694,46 @@ function gfResultHTML(){
   const t = GF_TARGETS.find(t=>t.k===GFDATA.target) || GF_TARGETS[0];
   if(seen<8) return `<div class="dk-res" id="gfRes"><div class="dr-band">Too early to read.</div><p>You've only had the chance to observe ${seen} item${seen===1?'':'s'} so far — and honesty about that is the whole method. Green flags are evidence, and evidence takes time. Come back when there's more of it.</p></div>`;
   const pct=Math.round(100*score/(2*seen));
-  let bars='';
+  // per-area
+  const areas=[]; let bars='';
   GF_SECS.forEach((name,c)=>{
     let cs=0,cn=0;
-    GF_ITEMS.forEach((it,i)=>{ if(it.cat!==c) return; const v=ans[i]; if(v>=1){ cn++; cs += (v===3?2:(v===2?1:0)); } });
+    GF_ITEMS.forEach((it,i)=>{ if(it.cat!==c) return; const v=ans[i]; if(v>=1){ cn++; cs += pts(v); } });
+    const p = cn? Math.round(100*cs/(2*cn)) : null;
+    areas.push({name, p, cn, why:GF_WHY[c]});
     if(cn===0){ bars += `<div class="blend-row"><div class="br-top"><span class="br-name">${name}</span><span class="br-pct">no read yet</span></div><div class="blend-bar"><i style="width:0%"></i></div></div>`; }
-    else { const p=Math.round(100*cs/(2*cn)); bars += `<div class="blend-row"><div class="br-top"><span class="br-name">${name}</span><span class="br-pct">${p}%</span></div><div class="blend-bar"><i style="width:${p}%"></i></div></div>`; }
+    else { bars += `<div class="blend-row"><div class="br-top"><span class="br-name">${name}</span><span class="br-pct">${p}%</span></div><div class="blend-bar"><i style="width:${p}%"></i></div></div>`; }
   });
+  // area interpretation paragraph
+  const read = areas.filter(x=>x.p!==null);
+  let areaPara='';
+  if(read.length>=2){
+    const sorted=[...read].sort((x,y)=>y.p-x.p);
+    const best=sorted[0], worst=sorted[sorted.length-1];
+    areaPara = `Reading the areas: the strongest signal is <b>${best.name}</b> at ${best.p}% — worth a lot, because ${best.why}. The thinnest is <b>${worst.name}</b> at ${worst.p}%, and that one deserves your attention, because ${worst.why}.`;
+    if(swings.length>=4 && swings.length>=strong.length){
+      areaPara += ` Notice, too, how much of this read lives in "swings back and forth" — ${swings.length} items. Take that seriously: on-again-off-again good isn't good at half strength. It's the pattern that keeps a person guessing, and what you can count on is the only part that counts.`;
+    }
+    const noRead=areas.filter(x=>x.p===null).length;
+    if(noRead) areaPara += ` ${noRead===1?'One area has':noRead+' areas have'} no read yet — not a mark against anyone, just where time hasn't had its chance.`;
+    areaPara = `<p style="margin-top:14px">${areaPara}</p>`;
+  }
   const li=a=>a.map(x=>`<li>${x}</li>`).join('');
   let head, body;
-  if(pct>=70){ head=`A lot of good — showing up consistently.`; body=`Across ${seen} observed items, your read on ${t.h} is strong in the way that matters: not one grand gesture, but good things <em>repeating</em>. Steadiness is the whole flag — and this read has it.`; }
-  else if(pct>=40){ head=`Real good signs — still filling in.`; body=`Across ${seen} observed items, there's genuine good here, and gaps where the picture hasn't filled in yet. Neither is a verdict. Let time keep answering — it will.`; }
-  else { head=`The good stuff isn't showing up much yet.`; body=`Across ${seen} observed items, the green flags are thin so far. Be careful with the conclusion you draw: this list doesn't say anything bad is happening — but the absence of bad isn't the presence of good. A relationship gets built out of the things on this list actually happening. Wanting them to happen is not the same thing.`; }
+  if(pct>=75){ head=`A lot of good — showing up consistently.`; body=`Across ${seen} observed items, your read on ${t.h} is strong in the way that matters: not one grand gesture, but good things <em>repeating</em>. Steadiness is the whole flag — and this read has it.`; }
+  else if(pct>=50){ head=`Some real good — not yet steady.`; body=`Across ${seen} observed items, there are genuine strengths here — and a meaningful share of the good comes and goes. Don't average those together. The consistent parts are worth building on; the swinging parts are a question the next months will answer, one way or the other.`; }
+  else if(pct>=30){ head=`More swing than steadiness.`; body=`Across ${seen} observed items, the good stuff appears — but it doesn't hold. Read that honestly: inconsistency in good things isn't half-credit. The on-off version of warmth, honesty, or repair is its own pattern, and it's the one that keeps people confused and staying. What you can count on is what counts, and right now that list is short.`; }
+  else { head=`The good stuff isn't showing up much yet.`; body=`Across ${seen} observed items, the green flags are thin so far. Be careful with the conclusion you draw: this list doesn't say anything bad is happening — but the absence of bad isn't the presence of good. A relationship gets built out of the things on this list actually happening, and kept happening. Wanting them to happen is not the same thing.`; }
   return `<div class="dk-res" id="gfRes"><div class="dr-band">${head}</div>
   <p style="font-size:.85rem;color:var(--ink-soft)">This is your own read on ${t.h}, organized — the audit can only see what you've seen.</p>
   <p>${body}</p>
   <div style="margin-top:14px">${bars}</div>
+  ${areaPara}
   ${strong.length?`<p style="margin-bottom:2px;margin-top:16px"><b>Strongest signs</b> — the ones you marked consistent:</p><ul>${li(strong)}</ul>`:``}
   ${swings.length?`<p style="margin-bottom:2px;margin-top:14px"><b>Swings back and forth</b> — worth a careful eye, because a good thing that comes and goes is not the same as a good thing. Steadiness is the flag; the on-off version of it is its own signal:</p><ul>${li(swings)}</ul>`:``}
   ${missing.length?`<p style="margin-bottom:2px;margin-top:14px"><b>Mostly absent so far</b> — you've had the chance, and these haven't been showing up. Not a charge sheet; just worth noticing, because these are the ones that make the everyday good:</p><ul>${li(missing)}</ul>`:``}
   </div>`;
 }
-
 function gfModuleHTML(){
   const back = `<button class="back-link" onclick="backToHub()">&larr; All bonus</button>`;
   const head = listHead('Green-flag audit','Is the good stuff actually here — consistently?');
