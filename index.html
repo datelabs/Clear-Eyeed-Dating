@@ -1868,6 +1868,120 @@ function fsModuleHTML(){
     <button onclick="resetFs()" style="display:block;margin:12px auto 0;background:none;border:none;color:var(--ink-soft);font-family:'Inter',sans-serif;font-size:.8rem;text-decoration:underline;cursor:pointer">Start over</button>`;
 }
 
+/* ---------- Feeling weird: branching triage ---------- */
+const FW_NODES = {
+ n0:{ q:`First — your body. Right now, are you...`,
+   sub:`Before anything gets figured out, this one question decides everything else.`,
+   opts:[[`Flooded — racing, looping, can't put it down`,'e_flood'],[`Stirred up, but I can think`,'n1'],[`Calm — just puzzled`,'n1']]},
+ n1:{ q:`Which shape is the weird?`,
+   opts:[[`Something happened — a moment, a comment, a text`,'n2a'],[`It's been growing in the background`,'n2b'],[`It spikes around them — before seeing them, after, or waiting to hear back`,'n2c']]},
+ n2a:{ q:`Can you name the thing they did?`,
+   opts:[[`Yes — I can point at it`,'n3a'],[`Sort of — it was small, maybe nothing`,'n3a2'],[`No — nothing happened, and I still feel off`,'n2c']]},
+ n3a:{ q:`Run the friend test: if this exact thing happened to someone you love, would you flag it?`,
+   opts:[[`Yes — I'd tell them to take it seriously`,'n4a'],[`Honestly... no. It would seem fine`,'e_sting']]},
+ n4a:{ q:`One more: is any part of you nervous about how they'd react if you brought it up?`,
+   opts:[[`No — I just don't know how to say it`,'e_name'],[`Yes — I'm careful around their reactions`,'e_fear']]},
+ n3a2:{ q:`Has this small thing happened before?`,
+   opts:[[`Yes — it's a repeat`,'e_pattern'],[`First time`,'e_first']]},
+ n2b:{ q:`When you're around them lately, which is closest?`,
+   opts:[[`Foggy — confused about what's true, what I agreed to, whether I'm the problem`,'e_fog'],[`Braced — managing, rehearsing, careful`,'e_brace'],[`Flat — the good feelings have dimmed`,'n3b'],[`Torn — something specific keeps not sitting right`,'n3b2']]},
+ n3b:{ q:`Did the flatness follow closeness — showing up right after things got good, deep, or serious?`,
+   opts:[[`Actually... yes`,'e_deact'],[`No — it's been a slow fade`,'e_fade']]},
+ n3b2:{ q:`Is it about where this is going — the life-direction stuff — or about how they treat you day to day?`,
+   opts:[[`Where it's going`,'e_values'],[`How they treat me`,'n3a']]},
+ n2c:{ q:`When exactly does it spike?`,
+   opts:[[`Waiting to hear back — the gaps, the silences`,'e_gap'],[`Right before seeing them`,'e_before'],[`Afterward — the comedown`,'e_after']]},
+};
+const FW_ENDS = {
+ e_flood:{ head:`Nothing gets decided from a flooded body.`,
+   body:`What you're feeling is real — but a flooded nervous system isn't reading this situation, it's reliving every situation that ever felt like it. Decisions made from this state are almost always the ones you'd take back. The feeling will keep. It will still be there in twenty minutes — the difference is that you'll be holding it, instead of it holding you.`,
+   move:`Set a 20-minute timer. Move your body — walk, shower, step outside. Phone in the other room. Then come back and run this again.`,
+   links:[[`Read: The spiral`,`switchTab('grow');setGrow(5)`]]},
+ e_name:{ head:`You can point at it. So say it.`,
+   body:`You passed your own friend test — if this happened to someone you love, you'd call it real. That means the weird isn't confusion; it's information you haven't delivered yet. And the conversation you're avoiding is smaller than the resentment you'd be building instead.`,
+   move:`Say it in the four-move shape: the specific thing → how it landed → what you're asking for → the open door. Small and early beats big and late.`,
+   links:[[`Read: Tough topics`,`switchTab('grow');setGrow(2)`]]},
+ e_fear:{ head:`Read this one slowly: you're nervous about their reaction.`,
+   body:`Notice what you just said — not "I don't know how to bring it up" but "I'm careful about how they'd react." In a good relationship, honesty costs a hard conversation — it doesn't cost safety or warmth. Fear of a partner's reaction is itself a finding, separate from whatever tonight's issue was. Treat it as data.`,
+   move:`Don't force the conversation tonight. Talk it through with someone you trust first — and take the longer look, calmly, on your own time.`,
+   links:[[`The dark triad guide`,`switchTab('bonus');openModule('dark')`],[`Felt-safety read`,`switchTab('bonus');openModule('fs')`]]},
+ e_sting:{ head:`It stung because of where it landed.`,
+   body:`By your own read, this wouldn't alarm you if it happened to a friend — which means the size of the feeling is coming from where it hit, not what hit. That doesn't make it fake; old bruises are real bruises. It changes the move, though: this one gets handled with yourself first, then shared as a tenderness rather than a charge.`,
+   move:`Name it to yourself honestly — "this touched something old." If you share it, share that version: "this landed harder than it maybe should have, and I want you to know why."`,
+   links:[[`Your attachment guide`,`switchTab('bonus');openAttach(viewLens||'secure')`],[`Read: Knowing what you need`,`switchTab('grow');setGrow(7)`]]},
+ e_pattern:{ head:`Small — but repeating.`,
+   body:`One instance of almost anything is a moment. The same small thing arriving again and again is a pattern — and patterns are the only thing this app's audits actually trust. Stop re-litigating each instance on its own; start watching the shape.`,
+   move:`Say it once, plainly, and then watch what happens to the pattern. A person adjusts. A pattern resumes. Log what you see.`,
+   links:[[`Green-flag audit`,`switchTab('bonus');openModule('gf')`],[`Dark triad audit`,`switchTab('bonus');openModule('dark')`]]},
+ e_first:{ head:`First time, small thing — say it while it's cheap.`,
+   body:`One instance isn't a verdict, and treating it like one wouldn't be fair. But small-and-early is the cheapest a conversation will ever be — the same sentence delivered six months from now arrives with interest.`,
+   move:`Mention it lightly, today if you can: "small thing — that landed a bit off with me." Then watch how it's received. The response will tell you more than the thing itself did.`,
+   links:[[`Read: Tough topics`,`switchTab('grow');setGrow(2)`]]},
+ e_fog:{ head:`The fog is the finding.`,
+   body:`Confused about what was said, what you agreed to, whether you're the problem — while everywhere else in your life, your head works fine. Clarity that goes missing around exactly one person is not a you-problem. It's a signature, and it's worth taking seriously.`,
+   move:`Stop trying to think your way clear tonight — fog doesn't resolve from inside. Start writing things down as they happen: dates, words, what was actually said. Paper doesn't get confused.`,
+   links:[[`The dark triad guide & audit`,`switchTab('bonus');openModule('dark')`]]},
+ e_brace:{ head:`Your body's been filing reports.`,
+   body:`Managed, rehearsed, careful — that's not a mood, it's a posture. And a posture is data collected over time. Before deciding what it means, go read the full report you've already been writing.`,
+   move:`Run the felt-safety read tonight — answer with your body, not your hopes — and let the result route you from there.`,
+   links:[[`Felt-safety read`,`switchTab('bonus');openModule('fs')`]]},
+ e_deact:{ head:`The flatness followed the closeness.`,
+   body:`Feelings that dim right after things get good, deep, or serious have a specific signature — often it isn't the connection failing, it's a system protecting itself from exactly the thing it wants. Safe can read as flat to wiring that never got much practice at safe.`,
+   move:`Don't decide anything from inside the dip. Next time the pull for distance comes, stay ten more minutes — literally — say one true thing, and watch whether the flatness was protection or truth.`,
+   links:[[`The avoidant guide`,`switchTab('bonus');openAttach('avoidant')`],[`Read: Accept love`,`switchTab('grow');setGrow(4)`]]},
+ e_fade:{ head:`A slow fade is still information.`,
+   body:`Not braced, not foggy — just dimming. Sometimes that's a mismatch surfacing gently; sometimes it's early-spark chemistry settling down and asking to be replaced by something real. The question that separates them: around this person, is there a version of you emerging that you actually like?`,
+   move:`Re-run the green-flag audit with fresh eyes, and sit with the Values questions — direction mismatches often show up first as unexplained dimming.`,
+   links:[[`Green-flag audit`,`switchTab('bonus');openModule('gf')`],[`Values questions`,`activeCat=6;switchTab('questions')`]]},
+ e_values:{ head:`This isn't about tonight. It's about direction.`,
+   body:`The weird that keeps not sitting right about where this is going is one of the few feelings love genuinely can't fix — two good people can be pointed at two different lives. That's not a verdict. It's a conversation, and you get to set its deadline.`,
+   move:`Take it out of your head and into the open — gently, and soon. The Values questions were built to hold exactly this conversation.`,
+   links:[[`Values & Direction questions`,`activeCat=6;switchTab('questions')`]]},
+ e_gap:{ head:`The weird lives in the gaps.`,
+   body:`Nothing happened — and that's exactly when it hits. That's the signature of an alarm filling ambiguity: a silence arrives, and your system writes a story to explain it. The story feels like information. It's fiction, with your oldest fear as the author.`,
+   move:`Don't reach from the spike. Soothe first — twenty minutes. Then, if you still want contact, ask plainly instead of testing: "I'm feeling a little disconnected — I'd love some reassurance."`,
+   links:[[`Read: The spiral`,`switchTab('grow');setGrow(5)`],[`Your attachment guide`,`switchTab('bonus');openAttach(viewLens||'anxious')`]]},
+ e_before:{ head:`The dread arrives before they do.`,
+   body:`A body that braces before an evening is predicting the work the evening will require — the managing, the reading, the performing. Ask it directly: what exactly am I preparing to handle? The answer is usually specific. And usually something you already know.`,
+   move:`Before you go, name the specific thing you're bracing for — out loud or on paper. Then watch the evening: did the prediction come true? Your body keeps score. Check its accuracy.`,
+   links:[[`Felt-safety read`,`switchTab('bonus');openModule('fs')`]]},
+ e_after:{ head:`The comedown is data.`,
+   body:`Drained instead of warmed — and if there's also a pull to win the next one, name the mix honestly: that's the signature of attention that spikes and drops, and the crash is part of how it hooks. Real connection leaves you fuller than it found you.`,
+   move:`Track it three times. After each contact, one note: fuller, or spent? Three data points beat any amount of wondering.`,
+   links:[[`Felt-safety read`,`switchTab('bonus');openModule('fs')`],[`The machinery guide`,`switchTab('bonus');openModule('pua')`]]},
+};
+let fwNode='n0', fwStack=[];
+function fwGo(id){ fwStack.push(fwNode); fwNode=id; renderBonus(); window.scrollTo({top:0,behavior:'smooth'}); }
+function fwBack(){ if(fwStack.length){ fwNode=fwStack.pop(); renderBonus(); } }
+function fwReset(){ fwNode='n0'; fwStack=[]; renderBonus(); window.scrollTo({top:0,behavior:'smooth'}); }
+
+function fwModuleHTML(){
+  const back = `<button class="back-link" onclick="backToHub()">&larr; All bonus</button>`;
+  const head = listHead('Feeling weird?','And don\u2019t know what to do \u2014 triage for exactly that.');
+  let body='';
+  if(FW_ENDS[fwNode]){
+    const e=FW_ENDS[fwNode];
+    let lensLine='';
+    if(fwNode==='e_gap' && viewLens==='anxious') lensLine=`<p>Through your lens, this one is especially yours: an anxious scanner fires around ambiguity even with genuinely steady people. Timing is the tell — an alarm that follows nothing is the old wiring talking.</p>`;
+    if(fwNode==='e_deact' && viewLens==='avoidant') lensLine=`<p>Through your lens, weight this heavily: deactivation feels like "meh" from the inside, and it arrives right on schedule — the moment things get real. The dip is not the truth about them.</p>`;
+    const links = (e.links||[]).map(l=>`<button class="btn" style="display:block;width:100%;margin-top:8px" onclick="${l[1]}">${l[0]}</button>`).join('');
+    body = `<div class="dk-res" style="margin-top:18px"><div class="dr-band">${e.head}</div>
+      <p>${e.body}</p>${lensLine}
+      <p><b>Your next move:</b> ${e.move}</p>
+      ${links}
+      <p style="font-size:.8rem;color:var(--ink-soft);margin-top:12px">This is triage, not a verdict \u2014 a next step, not a judgment of anyone.</p></div>
+      <button onclick="fwReset()" style="display:block;margin:14px auto 0;background:none;border:none;color:var(--ink-soft);font-family:'Inter',sans-serif;font-size:.8rem;text-decoration:underline;cursor:pointer">Run it again</button>`;
+  } else {
+    const n=FW_NODES[fwNode];
+    const opts=n.opts.map(o=>`<div class="dk-item" style="cursor:pointer" onclick="fwGo('${o[1]}')"><div class="dk-q">${o[0]}</div></div>`).join('');
+    body = `<h1 class="cat-title" style="margin-top:16px">${n.q}</h1>
+      ${n.sub?`<p class="cat-intro">${n.sub}</p>`:``}
+      ${opts}
+      ${fwStack.length?`<button onclick="fwBack()" style="display:block;margin:14px auto 0;background:none;border:none;color:var(--ink-soft);font-family:'Inter',sans-serif;font-size:.8rem;text-decoration:underline;cursor:pointer">&larr; back one</button>`:``}`;
+  }
+  return back + head + body;
+}
+
 const PUA_GUIDE = {
  eyebrow:`Protection · The first few dates`,
  title:`If it feels like magic, check for the <em>machinery</em>.`,
@@ -2093,9 +2207,14 @@ function bonusHubHTML(){
        <div class="bc-s">Your body runs its own read on every person — this organizes it. Rate what your nervous system actually does around them: the settle signals, the brace signals, and what the mix means through your attachment lens.</div></div>
        <div class="bc-arrow">&#8250;</div>
      </div>
+     <div class="bonus-card" onclick="openModule('fw');fwReset()">
+       <div class="bc-ic">&#9680;</div>
+       <div><div class="bc-t">Feeling weird and don't know what to do</div>
+       <div class="bc-s">For the moment itself — something's off tonight and you can't name it. A few quick taps to find out what kind of weird this is, whose signal it is, and the one next move that fits. Calm first, always.</div></div>
+       <div class="bc-arrow">&#8250;</div>
+     </div>
 ${attachPanelHTML()}
-${darkPanelHTML()}
-     <p class="cat-intro" style="margin-top:12px;font-size:.92rem">One more is on the way — &ldquo;feeling weird and don't know what to do.&rdquo;</p>`;
+${darkPanelHTML()}`;
 }
 
 function mbtiModuleHTML(){
@@ -2134,6 +2253,7 @@ function renderBonus(){
                : bonusModule==='pua' ? puaModuleHTML()
                : bonusModule==='gf' ? gfModuleHTML()
                : bonusModule==='fs' ? fsModuleHTML()
+               : bonusModule==='fw' ? fwModuleHTML()
                : bonusHubHTML();
 }
 function openModule(m){ bonusModule=m; renderBonus(); window.scrollTo({top:0,behavior:'smooth'}); }
