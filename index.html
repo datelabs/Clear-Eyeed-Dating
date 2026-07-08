@@ -1646,12 +1646,85 @@ const PUA_GUIDE = {
   {t:`try`,text:`On your next first date, do two things on purpose: go off-script once with a genuinely specific question about your own life or his — something no routine could have prepped — and decline one small escalation without apology. Then watch for one thing only: does he respond to <em>you</em>, or does the show pick back up where it left off? And if the fun of the night keeps requiring you to stay slightly off-balance — the guide next door is the longer look at where that goes.`}
  ]
 };
+const PUA_ITEMS = [
+ {ph:0, text:`Stories arrive polished — practiced beats, rehearsed punchlines, and a quick glance to check whether the line landed.`},
+ {ph:0, text:`The evening is steered — topics change when they change them, moments escalate on their clock, and you feel more like an audience than a participant.`},
+ {ph:0, heavy:1, text:`Touch grows on a schedule — each one slightly bigger than the last, testing what you'll allow, whatever the moment actually called for.`},
+ {ph:0, text:`Word-pictures and "imagine" games keep aiming at your feelings — and you catch yourself going pleasantly foggy instead of sharply engaged.`},
+ {ph:0, text:`Compliments carry a hook — a sting folded into the praise that leaves you reaching to re-earn approval you never lost.`},
+ {ph:0, text:`Scarcity is staged — the time limit that never ends the date, the theatrically busy phone, the stories where other women keep wanting them.`},
+ {ph:0, heavy:1, text:`Warmth switches on and off within a single evening — and your leaning in is what switches it back on.`},
+ {ph:0, text:`Your specifics don't register — nothing you share gets picked up or circled back to. The whole show would run the same on anyone.`},
+ {ph:0, text:`Instant depth — "I've never told anyone this," "I feel like I've known you forever" — inside the first hour.`},
+ {ph:1, text:`Attention arrives in unpredictable bursts — a flood, then silence, then the warm return timed to the moment you start to detach.`},
+ {ph:1, text:`You're auditioning — managing their interest level like a job, proving yourself to someone you only just met.`},
+ {ph:1, heavy:1, text:`When you slow the pace or decline a small escalation, the routine resets and resumes — the same move retried, the flicker of irritation smoothed over.`},
+];
+const PUA_PHASES = [`During the date`,`Between dates — and inside you`];
+let PUAANS = store('ce_pua', {});
+let puaView = 'guide';
+let puaShowRes = false;
+
+function openPuaView(v){ puaView=v; renderBonus(); if(v==='guide') window.scrollTo({top:0,behavior:'smooth'}); }
+function setPuaAns(i,v){ PUAANS[i]=v; try{ save('ce_pua', PUAANS); }catch(e){} puaShowRes=false; renderBonus(); }
+function readPua(){ puaShowRes=true; renderBonus(); const el=document.getElementById('puaRes'); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); }
+function resetPua(){ if(!confirm('Clear all your answers and start over?')) return; PUAANS={}; try{ save('ce_pua', PUAANS); }catch(e){} puaShowRes=false; renderBonus(); window.scrollTo({top:0,behavior:'smooth'}); }
+
+function puaResultHTML(){
+  let P=0,O=0,seen=0; const pats=[],onces=[];
+  PUA_ITEMS.forEach((it,i)=>{
+    const v=PUAANS[i];
+    if(v>=1) seen++;
+    if(v===3){ P += it.heavy?2:1; pats.push(it.text); }
+    if(v===2){ O++; onces.push(it.text); }
+  });
+  if(seen<4) return `<div class="dk-res" id="puaRes"><div class="dr-band">Too early to read.</div><p>You've only been able to observe ${seen} item${seen===1?'':'s'} so far. Answer what the date actually showed you — "can't know yet" is a real answer — and come back after the next one.</p></div>`;
+  const li = a=>a.map(t=>`<li>${t}</li>`).join('');
+  if(P>=3){
+    return `<div class="dk-res" id="puaRes"><div class="dr-band" style="color:var(--wine)">This reads as a routine.</div>
+    <p>Across ${seen} observed items, what you've marked isn't a person clicking with you — it's a system running on you:</p>
+    <ul>${li(pats)}</ul>
+    <p>You don't owe a stranger an audition, and attraction that needs you off-balance to work is not going anywhere good. Slow everything way down, or step out — and notice, from a little distance, how fast the show finds a new seat to fill. If you keep seeing them anyway, take the longer look next door: the dark triad audit watches these same instincts over months.</p></div>`;
+  }
+  if(P>=1 || O>=4){
+    return `<div class="dk-res" id="puaRes"><div class="dr-band">Worth watching.</div>
+    <p>Not a verdict — a few live wires across ${seen} observed items:</p>
+    ${pats.length?`<p style="margin-bottom:2px"><b>Marked as a pattern:</b></p><ul>${li(pats)}</ul>`:``}
+    ${onces.length?`<p style="margin-bottom:2px"><b>Seen once or twice</b> — which, on its own, is usually just a person being human. These only matter if they repeat:</p><ul>${li(onces)}</ul>`:``}
+    <p>Run the rhythm-break test from the guide on the next date: decline one small escalation, go specific and off-script, and just watch. A person adapts and gets curious. A routine resets and resumes. That one observation will usually settle this list.</p></div>`;
+  }
+  return `<div class="dk-res" id="puaRes"><div class="dr-band">Reads like a person.</div>
+  <p>Across ${seen} observed items, nothing rises above ordinary charm and ordinary nerves. ${O>0?`A few once-or-twice marks are what being human looks like — everyone has told their best story before. `:``}Whatever this is, it's responding to <em>you</em> — which is the one thing a routine can't do. Enjoy it at normal speed.</p></div>`;
+}
+
 function puaModuleHTML(){
-  const g=PUA_GUIDE; let blocks=''; let firstH=true;
-  g.blocks.forEach(b=>{ let html=growBlock(b); if(b.t==='h'&&firstH){ html=html.replace('grow-h','grow-h first'); firstH=false; } blocks+=html; });
+  const pills = `<button class="cat-pill${puaView==='guide'?' active':''}" onclick="openPuaView('guide')">The guide</button>
+    <button class="cat-pill${puaView==='audit'?' active':''}" onclick="openPuaView('audit')">Field audit</button>`;
+  let body='';
+  if(puaView==='guide'){
+    const g=PUA_GUIDE; let blocks=''; let firstH=true;
+    g.blocks.forEach(b=>{ let html=growBlock(b); if(b.t==='h'&&firstH){ html=html.replace('grow-h','grow-h first'); firstH=false; } blocks+=html; });
+    body = `<div class="cat-eyebrow">${g.eyebrow}</div><h1 class="cat-title">${g.title}</h1><p class="cat-intro">${g.intro}</p>${blocks}`;
+  } else {
+    let items='';
+    PUA_PHASES.forEach((ph,pi)=>{
+      items += `<div class="group-label" style="margin-top:26px">${ph}</div>`;
+      PUA_ITEMS.forEach((it,i)=>{
+        if(it.ph!==pi) return;
+        const chips = DARK_CHIPS.map((c,v)=>`<button class="dk-chip${PUAANS[i]===v?' on':''}" onclick="setPuaAns(${i},${v})">${c}</button>`).join('');
+        items += `<div class="dk-item"><div class="dk-q">${it.text}</div><div class="dk-chips">${chips}</div></div>`;
+      });
+    });
+    body = `<div class="cat-eyebrow">Protection · Field audit</div><h1 class="cat-title">Mark only what you've <em>seen</em>.</h1>
+      <p class="cat-intro">Twelve observations from the first few dates. Nothing to provoke, no test to run yet — just record what actually happened, and be honest about what you couldn't see. And remember: <em>once or twice is what being human looks like</em> — polished stories and confident touch exist innocently. The audit listens for the system, not the moment. This stays on your phone.</p>
+      ${items}
+      <button class="dk-go" onclick="readPua()">Read the pattern</button>
+      ${puaShowRes ? puaResultHTML() : ``}
+      <button class="dk-reset" onclick="resetPua()">Start over — clear my answers</button>`;
+  }
   return `<button class="back-link" onclick="backToHub()">&larr; All bonus</button>`
     + listHead('Spot the pick-up artist','Choreography recognition — for the first few dates.')
-    + `<div class="cat-eyebrow" style="margin-top:14px">${g.eyebrow}</div><h1 class="cat-title">${g.title}</h1><p class="cat-intro">${g.intro}</p>${blocks}`;
+    + `<nav class="cat-nav" style="margin-top:10px">${pills}</nav>` + body;
 }
 function darkPanelHTML(){
   return `<div class="group-label" style="margin-top:32px">Protection</div>
