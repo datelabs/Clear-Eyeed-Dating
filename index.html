@@ -1653,15 +1653,15 @@ function darkResultHTML(){
     <p>Everywhere else, this app weighs costs and lets you choose. Not here. There is no version of "the work" that turns being a resource into being loved. What you've recorded is the one signal that means <b>leave</b> — you don't owe a longer audition to someone who is spending you.</p>
     <p><b>Keep this private.</b> Don't present it to them as a case; people who run these patterns punish exposure, not the behavior. If any part of you is afraid of how they'd react, treat that fear as the finding. Leave with people around you, not alone — and if you feel unsafe, take that seriously and get real support.</p></div>`;
   }
-  if(P>=1 || O>=3){
+  if(P>=1 || O>=5){
     return `<div class="dk-res" id="darkRes"><div class="dr-band">Worth watching.</div>
     <p>Not a verdict — a watch list. Across ${seen} observed items, a few live wires:</p>
     ${pats.length?`<p style="margin-bottom:2px"><b>Marked as a pattern:</b></p><ul>${li(pats)}</ul>`:``}
-    ${onces.length?`<p style="margin-bottom:2px"><b>Seen once or twice:</b></p><ul>${li(onces)}</ul>`:``}
+    ${onces.length?`<p style="margin-bottom:2px"><b>Seen once or twice</b> — which, on its own, is usually just a person being human. These only matter if they repeat:</p><ul>${li(onces)}</ul>`:``}
     <p>Give it another month of quiet attention, and let the tape grow. One honest conversation about a "once" item tells you a lot — watch whether it's received, or punished. And remember the distinction from the guide: fear leaks, manipulation aims. What you're watching for isn't imperfection. It's direction.</p></div>`;
   }
   return `<div class="dk-res" id="darkRes"><div class="dr-band">Low density.</div>
-  <p>Across ${seen} observed items, nothing you've marked rises above ordinary human mess. That's a real finding — charm can fake a good answer, but it can't fake ${seen} clean observations over time. Keep your eyes open the way you would anyway, and let this one earn trust at the normal speed.</p></div>`;
+  <p>Across ${seen} observed items, nothing you've marked rises above ordinary human mess. ${O>0?`A few once-or-twice marks are exactly what being human looks like — under stress or in a bad moment, almost everyone brushes one of these occasionally. `:``}That's a real finding — charm can fake a good answer, but it can't fake ${seen} clean observations over time. Keep your eyes open the way you would anyway, and let this one earn trust at the normal speed.</p></div>`;
 }
 
 function darkModuleHTML(){
@@ -1683,7 +1683,7 @@ function darkModuleHTML(){
       });
     });
     body = `<div class="cat-eyebrow">Protection · Field audit</div><h1 class="cat-title">Mark only what you've <em>seen</em>.</h1>
-      <p class="cat-intro">Eighteen observations on a timeline. No test to run on them, nothing to provoke — just record what time has already shown you, and be honest about what it hasn't: "can't know yet" is a real answer, and using it is what makes the read trustworthy. This stays on your phone.</p>
+      <p class="cat-intro">Observations on a timeline. No test to run on them, nothing to provoke — just record what time has already shown you, and be honest about what it hasn't: "can't know yet" is a real answer, and using it is what makes the read trustworthy. One more thing, and it matters: <em>once or twice is what being human looks like.</em> Under stress, almost everyone brushes one of these occasionally — the audit only starts listening when something repeats. This stays on your phone.</p>
       ${items}
       <button class="dk-go" onclick="readDark()">Read the density</button>
       <button onclick="resetDark()" style="display:block;margin:12px auto 0;background:none;border:none;color:var(--ink-soft);font-family:'Inter',sans-serif;font-size:.8rem;text-decoration:underline;cursor:pointer">Start over</button>
