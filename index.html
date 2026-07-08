@@ -1622,6 +1622,108 @@ const DARK_GUIDE = {
  ]
 };
 
+const GF_CATS = ['Conflict & Repair','Attachment & Consistency','Honesty & Integrity','Empathy & Attunement','Respect & Autonomy','Self-Awareness & Growth','Values & Direction'];
+const GF_TARGETS = [
+ {k:'dating', label:`Someone I'm dating`,      h:`someone you're dating`},
+ {k:'rel',    label:`My relationship`,          h:`your relationship`},
+ {k:'into',   label:`Someone I'm into`,         h:`someone you're into`},
+ {k:'past',   label:`Someone from my past`,     h:`someone from your past`},
+];
+const GF_ITEMS = [
+ {cat:0, text:`After a fight, repair actually happens — and sometimes they're the one who reaches first.`},
+ {cat:0, text:`They can say "I was wrong" — without you dragging it out of them, and without a "but" stapled to the end.`},
+ {cat:0, text:`Disagreement doesn't cost warmth — you can be on opposite sides of something and still feel liked.`},
+ {cat:1, text:`The effort is steady — no hot weeks and cold weeks — and your body has quietly stopped bracing for the drop.`},
+ {cat:1, text:`Words and actions match: plans made are plans kept, and "I'll call you" means a call.`},
+ {cat:1, text:`They're the same person everywhere — with you, their friends, their family, the person pouring the coffee.`},
+ {cat:2, text:`They tell you the truth even when it costs them something — the embarrassing detail, the inconvenient fact, offered unprompted.`},
+ {cat:2, text:`You get to simply believe them — nothing you've happened to verify has ever come back different from what they said.`},
+ {cat:2, text:`Direct questions get direct answers — no fog, no glide, no sudden change of subject.`},
+ {cat:3, text:`They notice when you're off — sometimes before you've said anything — and they ask.`},
+ {cat:3, text:`Your feelings get treated as information, not inconvenience: they want to understand what's happening in you, not just make it quiet.`},
+ {cat:3, text:`The small specifics come back later — the thing you mentioned once, remembered, because it mattered to you.`},
+ {cat:4, text:`Your no lands the first time — accepted without pouting, punishment, or a retry.`},
+ {cat:4, text:`They're genuinely glad you have your own life — friends, work, your own Tuesday nights — and none of it needs negotiating.`},
+ {cat:4, text:`When you set a boundary, they adjust to it — and don't make you pay for having one.`},
+ {cat:5, text:`They can tell you about a time they were the problem — specific, owned, with the wince still in it.`},
+ {cat:5, text:`They catch their own patterns in real time — "I'm doing the thing again" — without you having to prosecute.`},
+ {cat:5, text:`Feedback lands: you've said a hard thing, and watched it actually change something.`},
+ {cat:6, text:`You've seen them do the right thing when no one would ever have known.`},
+ {cat:6, text:`How they spend their time and money roughly matches what they say matters to them.`},
+ {cat:6, text:`Their picture of a good life has room in it for another whole person — and you can feel that the person is you.`},
+];
+const GF_CHIPS = [`No chance to see yet`,`Not so far`,`Once or twice`,`Consistently`];
+let GFDATA = store('ce_gf', {target:null, ans:{}});
+let gfShowRes = false;
+
+function gfSetTarget(k){ GFDATA.target=k; try{ save('ce_gf', GFDATA); }catch(e){} renderBonus(); window.scrollTo({top:0,behavior:'smooth'}); }
+function gfChangeTarget(){ if(Object.keys(GFDATA.ans||{}).length && !confirm('Switch who this is about? Your current answers will be cleared.')) return; GFDATA={target:null, ans:{}}; try{ save('ce_gf', GFDATA); }catch(e){} gfShowRes=false; renderBonus(); }
+function setGfAns(i,v){ GFDATA.ans[i]=v; try{ save('ce_gf', GFDATA); }catch(e){} gfShowRes=false; renderBonus(); }
+function readGf(){ gfShowRes=true; renderBonus(); const el=document.getElementById('gfRes'); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); }
+function resetGf(){ if(!confirm('Clear all your answers and start over?')) return; GFDATA.ans={}; try{ save('ce_gf', GFDATA); }catch(e){} gfShowRes=false; renderBonus(); window.scrollTo({top:0,behavior:'smooth'}); }
+
+function gfResultHTML(){
+  const ans=GFDATA.ans||{};
+  let seen=0, score=0; const strong=[], missing=[];
+  GF_ITEMS.forEach((it,i)=>{
+    const v=ans[i];
+    if(v>=1){ seen++; score += (v===3?2:(v===2?1:0)); }
+    if(v===3) strong.push(it.text);
+    if(v===1) missing.push(it.text);
+  });
+  const t = GF_TARGETS.find(t=>t.k===GFDATA.target) || GF_TARGETS[0];
+  if(seen<7) return `<div class="dk-res" id="gfRes"><div class="dr-band">Too early to read.</div><p>You've only had the chance to observe ${seen} item${seen===1?'':'s'} so far — and honesty about that is the whole method. Green flags are evidence, and evidence takes time. Come back when there's more of it.</p></div>`;
+  const pct=Math.round(100*score/(2*seen));
+  // per-category bars
+  let bars='';
+  GF_CATS.forEach((name,c)=>{
+    let cs=0,cn=0;
+    GF_ITEMS.forEach((it,i)=>{ if(it.cat!==c) return; const v=ans[i]; if(v>=1){ cn++; cs += (v===3?2:(v===2?1:0)); } });
+    if(cn===0){ bars += `<div class="blend-row"><div class="br-top"><span class="br-name">${name}</span><span class="br-pct">no read yet</span></div><div class="blend-bar"><i style="width:0%"></i></div></div>`; }
+    else { const p=Math.round(100*cs/(2*cn)); bars += `<div class="blend-row"><div class="br-top"><span class="br-name">${name}</span><span class="br-pct">${p}%</span></div><div class="blend-bar"><i style="width:${p}%"></i></div></div>`; }
+  });
+  const li=a=>a.map(x=>`<li>${x}</li>`).join('');
+  let head, body;
+  if(pct>=70){ head=`A lot of good — showing up consistently.`; body=`Across ${seen} observed items, your read on ${t.h} is strong in the way that matters: not one grand gesture, but good things <em>repeating</em>. That's the only kind of evidence worth building on.`; }
+  else if(pct>=40){ head=`Real good signs — still filling in.`; body=`Across ${seen} observed items, there's genuine good here, and genuine gaps where the picture hasn't filled in yet. Neither is a verdict. Let time keep answering — it will.`; }
+  else { head=`The good stuff isn't showing up much yet.`; body=`Across ${seen} observed items, the green flags are thin so far. Be careful with the conclusion you draw: this list doesn't say anything bad is happening — but remember that the absence of bad isn't the presence of good. A relationship gets built out of the things on this list actually happening. Wanting them to happen is not the same thing.`; }
+  return `<div class="dk-res" id="gfRes"><div class="dr-band">${head}</div>
+  <p style="font-size:.85rem;color:var(--ink-soft)">This is your own read on ${t.h}, organized — the audit can only see what you've seen.</p>
+  <p>${body}</p>
+  <div style="margin-top:14px">${bars}</div>
+  ${strong.length?`<p style="margin-bottom:2px;margin-top:16px"><b>Strongest signs</b> — the ones you marked consistent:</p><ul>${li(strong)}</ul>`:``}
+  ${missing.length?`<p style="margin-bottom:2px;margin-top:14px"><b>Not yet seen</b> — you've had the chance, and these haven't shown up. Not a charge sheet; just worth keeping an eye on, because these are the ones that make the everyday good:</p><ul>${li(missing)}</ul>`:``}
+  </div>`;
+}
+
+function gfModuleHTML(){
+  const back = `<button class="back-link" onclick="backToHub()">&larr; All bonus</button>`;
+  const head = listHead('Green-flag audit','Is the good stuff actually here — consistently?');
+  if(!GFDATA.target){
+    const btns = GF_TARGETS.map(t=>`<div class="dk-item" style="cursor:pointer;text-align:center;font-weight:600" onclick="gfSetTarget('${t.k}')">${t.label}</div>`).join('');
+    return back + head + `<div class="cat-eyebrow" style="margin-top:14px">Before you start</div>
+      <h1 class="cat-title">Who is this read <em>about</em>?</h1>
+      <p class="cat-intro">Red-flag hunting asks what's wrong. This asks the better question: is the good stuff actually here — not promised, not implied, but happening, repeatedly, where you can see it? Pick who you're reading. You can run it again for someone else any time.</p>${btns}`;
+  }
+  const t = GF_TARGETS.find(x=>x.k===GFDATA.target) || GF_TARGETS[0];
+  let items='';
+  GF_CATS.forEach((name,c)=>{
+    items += `<div class="group-label" style="margin-top:26px">${name}</div>`;
+    GF_ITEMS.forEach((it,i)=>{
+      if(it.cat!==c) return;
+      const chips = GF_CHIPS.map((cLabel,v)=>`<button class="dk-chip${GFDATA.ans[i]===v?' on':''}" onclick="setGfAns(${i},${v})">${cLabel}</button>`).join('');
+      items += `<div class="dk-item"><div class="dk-q">${it.text}</div><div class="dk-chips">${chips}</div></div>`;
+    });
+  });
+  return back + head + `<div class="cat-eyebrow" style="margin-top:14px">About: ${t.label} &middot; <span style="text-decoration:underline;cursor:pointer" onclick="gfChangeTarget()">change</span></div>
+    <h1 class="cat-title">Mark only what you've <em>seen</em>.</h1>
+    <p class="cat-intro">The good stuff, across the same seven areas as the Questions deck. Rate what's actually happened where you could see it — "no chance to see yet" is a real answer, and using it honestly is what makes the read worth anything. Promised doesn't count. Implied doesn't count. Happened counts.</p>
+    ${items}
+    <button class="dk-go" onclick="readGf()">Read the signal</button>
+    ${gfShowRes ? gfResultHTML() : ``}
+    <button onclick="resetGf()" style="display:block;margin:12px auto 0;background:none;border:none;color:var(--ink-soft);font-family:'Inter',sans-serif;font-size:.8rem;text-decoration:underline;cursor:pointer">Start over</button>`;
+}
+
 const PUA_GUIDE = {
  eyebrow:`Protection · The first few dates`,
  title:`If it feels like magic, check for the <em>machinery</em>.`,
@@ -1835,9 +1937,15 @@ function bonusHubHTML(){
        <div class="bc-s">Rate a set of honest gut-checks to get your blend across the four styles — secure, anxious, avoidant, anxious-avoidant — and the one you lead with. It sets your lens, so every question speaks to the way you're wired.</div></div>
        <div class="bc-arrow">&#8250;</div>
      </div>
+     <div class="bonus-card" onclick="openModule('gf')">
+       <div class="bc-ic">&#10003;</div>
+       <div><div class="bc-t">Green-flag audit</div>
+       <div class="bc-s">The opposite of red-flag hunting: is the good stuff actually here, consistently? Pick who it's about, rate what you've genuinely seen across all seven areas, and get your read back — strengths, gaps, and the signs that matter most.</div></div>
+       <div class="bc-arrow">&#8250;</div>
+     </div>
 ${attachPanelHTML()}
 ${darkPanelHTML()}
-     <p class="cat-intro" style="margin-top:12px;font-size:.92rem">More quizzes are on the way — a green-flag audit, a felt-safety read, and &ldquo;feeling weird and don't know what to do.&rdquo;</p>`;
+     <p class="cat-intro" style="margin-top:12px;font-size:.92rem">More quizzes are on the way — a felt-safety read, and &ldquo;feeling weird and don't know what to do.&rdquo;</p>`;
 }
 
 function mbtiModuleHTML(){
@@ -1874,6 +1982,7 @@ function renderBonus(){
                : bonusModule==='attach' ? attachModuleHTML()
                : bonusModule==='dark' ? darkModuleHTML()
                : bonusModule==='pua' ? puaModuleHTML()
+               : bonusModule==='gf' ? gfModuleHTML()
                : bonusHubHTML();
 }
 function openModule(m){ bonusModule=m; renderBonus(); window.scrollTo({top:0,behavior:'smooth'}); }
