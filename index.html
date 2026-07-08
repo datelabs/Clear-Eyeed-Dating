@@ -170,6 +170,7 @@ body::after{
 .dk-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
 .dk-chip{font-family:'Inter',sans-serif;font-size:.72rem;padding:6px 11px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--ink-soft);cursor:pointer;-webkit-tap-highlight-color:transparent}
 .dk-chip.on{background:var(--gold-soft);border-color:var(--gold);color:var(--ink);font-weight:600}
+.fw2-item.on{border-color:var(--gold);background:var(--cream-deep)}
 .dk-res{border:1px solid var(--gold-soft);background:var(--paper);border-radius:16px;padding:20px 20px;margin-top:22px}
 .dk-res .dr-band{font-family:'Fraunces',serif;font-size:1.25rem;font-weight:600;margin-bottom:8px}
 .dk-res p{font-size:.95rem;line-height:1.65;margin:8px 0}
@@ -1982,6 +1983,188 @@ function fwModuleHTML(){
   return back + head + body;
 }
 
+/* ---------- Feeling weird v2: evidence-based triage ---------- */
+const FW2_EV = {
+ a:[ // something happened
+  {t:`I can name the specific thing they did.`, d:{beh:1}},
+  {t:`If it happened to my best friend, I'd flag it.`, d:{beh:1}},
+  {t:`This same thing has happened before.`, d:{beh:1,dur:1}},
+  {t:`Part of me is nervous about how they'd react if I brought it up.`, d:{fear:1}},
+  {t:`I've been careful around their moods lately — not just tonight.`, d:{brace:1,dur:1}},
+  {t:`Honestly, I can't point at anything — the feeling came anyway.`, d:{alarm:1}},
+  {t:`I keep replaying it, writing new versions of what it meant.`, d:{alarm:1}},
+  {t:`I'm confused about what was actually said or agreed to.`, d:{fog:1}},
+  {t:`It connects to a bigger question about where this is going.`, d:{dir:1}},
+  {t:`When I imagine just letting it go, my body doesn't let me.`, d:{beh:0.5,alarm:0.5}},
+ ],
+ b:[ // background growth
+  {t:`Around them I'm managing — rehearsing, editing, careful.`, d:{brace:1}},
+  {t:`That's been true for weeks now, not days.`, d:{dur:1}},
+  {t:`I feel foggy about what's true or what I agreed to — but clear everywhere else in my life.`, d:{fog:1}},
+  {t:`I could name at least one specific behavior of theirs that keeps repeating.`, d:{beh:1,dur:1}},
+  {t:`I'm nervous about how they'd react to full honesty.`, d:{fear:1}},
+  {t:`The good feelings dimmed right after things got closer or more serious.`, d:{deact:1}},
+  {t:`It's been a slow fade with no clear cause I can find.`, d:{fade:1}},
+  {t:`The unease is mostly about direction — kids, place, money, what a good life even is.`, d:{dir:1}},
+  {t:`My sleep, appetite, or focus have been off since this started.`, d:{brace:1}},
+  {t:`When plans with them fall through, part of me is relieved.`, d:{deact:1}},
+ ],
+ c:[ // spikes around contact
+  {t:`It spikes in the silences — waiting to hear back.`, d:{alarm:1}},
+  {t:`When they finally reply, relief floods in — and then the cycle restarts.`, d:{alarm:0.5,hook:0.5}},
+  {t:`Their attention comes in bursts — a flood, then quiet, then the warm return.`, d:{hook:1,beh:0.5}},
+  {t:`I brace before seeing them — like I'm preparing for work.`, d:{brace:1}},
+  {t:`After time together I'm drained, not warmed.`, d:{hook:1}},
+  {t:`...and I still find myself wanting to win the next one.`, d:{hook:1}},
+  {t:`The spike follows a specific thing they actually did.`, d:{beh:1}},
+  {t:`Nothing happened — the alarm fills the gap on its own.`, d:{alarm:1}},
+  {t:`I'm nervous about how they'd react if I named any of this.`, d:{fear:1}},
+  {t:`This pattern has been running for weeks.`, d:{dur:1}},
+ ],
+};
+const FW2_READS = {
+ fear:{ head:`Fear first — before anything else in this read.`,
+  body:`You checked that you're nervous about their reaction. In a good relationship, honesty costs a hard conversation — not safety, not warmth. Whatever else tonight is, treat that fear as its own finding, separate from the issue.`,
+  move:`Don't force the conversation tonight. Talk it through with someone you trust first — and take the longer look on your own time.`,
+  links:[[`The dark triad guide`,`switchTab('bonus');openModule('dark')`],[`Felt-safety read`,`switchTab('bonus');openModule('fs')`]]},
+ beh:{ head:`There's real behavior in the pile.`,
+  body:`Part of tonight points at something they actually did — nameable, and by your own read, worth flagging. That part isn't confusion; it's information you haven't delivered yet.`,
+  move:`Say it in the four-move shape: the specific thing → how it landed → the ask → the open door. Small and early beats big and late.`,
+  links:[[`Read: Tough topics`,`switchTab('grow');setGrow(2)`]]},
+ alarm:{ head:`Part of this is an alarm filling a gap.`,
+  body:`Some of what you checked spikes where nothing happened — the silence, the replay, the story-writing. That's an alarm authoring fiction, and the fiction feels exactly like information from the inside.`,
+  move:`Don't reach from the spike. Soothe first — twenty minutes — then, if you still want contact, ask plainly instead of testing.`,
+  links:[[`Read: The spiral`,`switchTab('grow');setGrow(5)`]]},
+ fog:{ head:`The fog signature is in here.`,
+  body:`Confusion about what was said or agreed to — while your head works fine everywhere else — is not a you-problem. It's a signature worth taking seriously on its own.`,
+  move:`Stop trying to think your way clear tonight. Start writing things down as they happen — dates, words, what was said. Paper doesn't get confused.`,
+  links:[[`Dark triad guide & audit`,`switchTab('bonus');openModule('dark')`]]},
+ brace:{ head:`Your body has been bracing.`,
+  body:`Managing, rehearsing, sleep and appetite paying the bill — that's a posture, not a mood, and postures are data collected over time.`,
+  move:`Run the felt-safety read — answer with your body, not your hopes — and let the result route you.`,
+  links:[[`Felt-safety read`,`switchTab('bonus');openModule('fs')`]]},
+ deact:{ head:`The flatness followed the closeness.`,
+  body:`Feelings that dim right when things get good or serious — plus relief when plans fall through — have a specific signature: often a system protecting itself from exactly what it wants. Safe can read as flat to wiring that never practiced safe.`,
+  move:`Don't decide from inside the dip. Next time the pull for distance comes, stay ten more minutes, say one true thing, and watch whether the flatness was protection or truth.`,
+  links:[[`The avoidant guide`,`switchTab('bonus');openAttach('avoidant')`]]},
+ fade:{ head:`A slow fade is still information.`,
+  body:`Not braced, not foggy — just dimming without a cause you can find. Sometimes it's a mismatch surfacing gently; sometimes it's early chemistry settling and asking to be replaced by something real.`,
+  move:`Re-run the green-flag audit with fresh eyes. The question that separates the two: around this person, is a version of you emerging that you like?`,
+  links:[[`Green-flag audit`,`switchTab('bonus');openModule('gf')`]]},
+ dir:{ head:`Some of this is about direction, not tonight.`,
+  body:`Unease about where this is going is one of the few feelings love can't fix — two good people can be pointed at two different lives. Not a verdict; a conversation with a deadline you get to set.`,
+  move:`Take it out of your head and into the open, gently and soon.`,
+  links:[[`Values & Direction questions`,`activeCat=6;switchTab('questions')`]]},
+ hook:{ head:`The comedown-and-chase pattern is in here.`,
+  body:`Drained after contact, and still wanting to win the next one — that mix is the signature of attention that spikes and drops, and the crash is part of how it hooks. Real connection leaves you fuller than it found you.`,
+  move:`Track it three times: after each contact, one note — fuller or spent? Three data points beat any amount of wondering.`,
+  links:[[`The machinery guide`,`switchTab('bonus');openModule('pua')`],[`Felt-safety read`,`switchTab('bonus');openModule('fs')`]]},
+};
+let fw2 = {step:'gate', shape:null, sel:{}};
+function fw2Reset(){ fw2={step:'gate', shape:null, sel:{}}; renderBonus(); window.scrollTo({top:0,behavior:'smooth'}); }
+function fw2Gate(v){ if(v==='flood'){ fw2.step='flood'; } else { fw2.step='shape'; } renderBonus(); window.scrollTo({top:0,behavior:'smooth'}); }
+function fw2Shape(s){ fw2.shape=s; fw2.sel={}; fw2.step='ev'; renderBonus(); window.scrollTo({top:0,behavior:'smooth'}); }
+function fw2Toggle(i){ if(fw2.sel[i]) delete fw2.sel[i]; else fw2.sel[i]=1; renderBonus(); }
+function fw2Read(){ fw2.step='res'; renderBonus(); window.scrollTo({top:0,behavior:'smooth'}); }
+
+function fw2CrossRef(dims){
+  const lines=[];
+  try{
+    // felt-safety
+    let sS=0,sN=0,bS=0,bN=0;
+    FS_ITEMS.forEach((it,i)=>{ const v=(FSDATA.ans||{})[i]; if(!(v>=1))return; const p=v===3?2:(v===2?1:0); if(it.ax==='s'){sN++;sS+=p;}else{bN++;bS+=p;} });
+    if(sN+bN>=10){
+      const bPct=bN?Math.round(100*bS/(2*bN)):0, sPct=sN?Math.round(100*sS/(2*sN)):0;
+      if(bPct>=40) lines.push(`Your felt-safety read already shows the brace running at ${bPct}% — tonight fits a pattern, not a mood.`);
+      else if(sPct>=55 && dims.alarm>0) lines.push(`Your felt-safety read says your body mostly settles around them (${sPct}%) — which supports reading tonight's spike as your alarm rather than their behavior.`);
+    }
+    // dark triad
+    let P=0; DARK_ITEMS.forEach((it,i)=>{ if(DARKANS[i]===3) P += it.heavy?2:1; });
+    if(P>=3) lines.push(`Your dark-triad audit already sits at high density — weight tonight's behavior signals heavily, and re-read that result.`);
+    else if(P>=1) lines.push(`Your dark-triad audit has at least one pattern marked — tonight belongs in that ledger too.`);
+    // green flags
+    const gans=(GFDATA&&GFDATA.ans)||{}; let gSeen=0,gScore=0;
+    GF_ITEMS.forEach((it,i)=>{ const v=gans[i]; if(v>=1){ gSeen++; gScore += v===3?2:(v===2?0.5:0);} });
+    if(gSeen>=8){ const g=Math.round(100*gScore/(2*gSeen));
+      if(g>=75) lines.push(`Your green-flag audit runs strong (${g}%) — that's real context: steady people earn a longer benefit of the doubt on a weird night.`);
+      else if(g<30) lines.push(`Your green-flag audit runs thin (${g}%) — tonight isn't happening against a backdrop of demonstrated good.`);
+    }
+  }catch(e){}
+  return lines;
+}
+
+function fw2ResultHTML(){
+  const items=FW2_EV[fw2.shape]||[];
+  const dims={};
+  Object.keys(fw2.sel).forEach(i=>{ const it=items[+i]; if(!it) return; Object.entries(it.d).forEach(([k,w])=>{ dims[k]=(dims[k]||0)+w; }); });
+  const dur=dims.dur||0; delete dims.dur;
+  const order=Object.entries(dims).filter(([k,v])=>v>0 && FW2_READS[k]).sort((a,b)=>b[1]-a[1]).map(([k])=>k);
+  // fear always first
+  const fi=order.indexOf('fear'); if(fi>0){ order.splice(fi,1); order.unshift('fear'); }
+  const picks=order.slice(0,3);
+  const total=Object.values(dims).reduce((t,v)=>t+v,0);
+  if(total<1.5){
+    return `<div class="dk-res"><div class="dr-band">One night can't tell.</div>
+    <p>Not enough checked to read confidently — and forcing a verdict from thin evidence is exactly what this version refuses to do. That's not a failure; it's the honest result.</p>
+    <p><b>Your next move:</b> run a three-day watching protocol. Each day, two notes: after any contact, <em>fuller or spent?</em> — and when the weird spikes, <em>what had they actually just done, if anything?</em> Then come back and run this again with data.</p>
+    <button onclick="fw2Reset()" style="display:block;margin:14px auto 0;background:none;border:none;color:var(--ink-soft);font-family:'Inter',sans-serif;font-size:.8rem;text-decoration:underline;cursor:pointer">Run it again</button></div>`;
+  }
+  let blocks='';
+  picks.forEach((k,n)=>{
+    const r=FW2_READS[k];
+    let extra='';
+    if(k==='beh' && dur>0) extra=` And it's repeating — which moves it from a moment to a pattern, the only thing the audits actually trust.`;
+    if(k==='alarm' && typeof viewLens==='string' && viewLens==='anxious') extra=` Through your lens: the anxious scanner fires around ambiguity even with steady people — timing is the tell.`;
+    if(k==='deact' && typeof viewLens==='string' && viewLens==='avoidant') extra=` Through your lens, weight this heavily: deactivation feels like "meh" from the inside, and it arrives right on schedule.`;
+    const links=(r.links||[]).map(l=>`<button class="btn" style="display:block;width:100%;margin-top:8px" onclick="${l[1]}">${l[0]}</button>`).join('');
+    blocks += `<div style="margin-top:${n?18:8}px"><div style="font-family:'Fraunces',serif;font-weight:600;font-size:1.05rem">${n+1}. ${r.head}</div>
+      <p style="margin:6px 0">${r.body}${extra}</p>
+      <p style="margin:6px 0"><b>The move:</b> ${r.move}</p>${links}</div>`;
+  });
+  const xr=fw2CrossRef(dims);
+  const xrHTML = xr.length? `<div style="margin-top:18px;border-top:1px dashed var(--line);padding-top:12px"><div style="font-family:'Fraunces',serif;font-weight:600">What your other reads add</div>${xr.map(l=>`<p style="margin:6px 0;font-size:.92rem">${l}</p>`).join('')}</div>` : ``;
+  const durLine = (dur>0 && picks[0]!=='beh') ? `<p style="font-size:.9rem;color:var(--ink-soft)">You also marked this as running for weeks — whatever the mix below, treat it as a pattern, not a mood.</p>` : ``;
+  return `<div class="dk-res"><div class="dr-band">${picks.length>1?`It's a mix — here's the order that matters.`:`One clear signal.`}</div>
+  <p style="font-size:.85rem;color:var(--ink-soft)">Built from ${Object.keys(fw2.sel).length} signals you checked${xr.length?` and your saved reads`:``} — triage, not a verdict.</p>
+  ${durLine}${blocks}${xrHTML}
+  <button onclick="fw2Reset()" style="display:block;margin:14px auto 0;background:none;border:none;color:var(--ink-soft);font-family:'Inter',sans-serif;font-size:.8rem;text-decoration:underline;cursor:pointer">Run it again</button></div>`;
+}
+
+function fw2ModuleHTML(){
+  const back = `<button class="back-link" onclick="backToHub()">&larr; All bonus</button>`;
+  const head = listHead('Feeling weird? (v2)','Same speed \u2014 but it gathers evidence instead of forcing one path.');
+  let body='';
+  if(fw2.step==='gate'){
+    body = `<h1 class="cat-title" style="margin-top:16px">First \u2014 your body. Right now, are you...</h1>
+      <p class="cat-intro">Before anything gets figured out, this one question decides everything else.</p>
+      <div class="dk-item" style="cursor:pointer" onclick="fw2Gate('flood')"><div class="dk-q">Flooded \u2014 racing, looping, can't put it down</div></div>
+      <div class="dk-item" style="cursor:pointer" onclick="fw2Gate('ok')"><div class="dk-q">Stirred up, but I can think</div></div>
+      <div class="dk-item" style="cursor:pointer" onclick="fw2Gate('ok')"><div class="dk-q">Calm \u2014 just puzzled</div></div>`;
+  } else if(fw2.step==='flood'){
+    body = `<div class="dk-res" style="margin-top:18px"><div class="dr-band">Nothing gets decided from a flooded body.</div>
+      <p>What you're feeling is real \u2014 but a flooded nervous system isn't reading this situation, it's reliving every situation that ever felt like it. The feeling will keep; it will still be there in twenty minutes \u2014 you'll just be the one holding it.</p>
+      <p><b>Your next move:</b> a 20-minute timer, your body moving, phone in the other room. Then come back.</p>
+      <button class="btn" style="display:block;width:100%;margin-top:8px" onclick="switchTab('grow');setGrow(5)">Read: The spiral</button></div>
+      <button onclick="fw2Reset()" style="display:block;margin:14px auto 0;background:none;border:none;color:var(--ink-soft);font-family:'Inter',sans-serif;font-size:.8rem;text-decoration:underline;cursor:pointer">Run it again</button>`;
+  } else if(fw2.step==='shape'){
+    body = `<h1 class="cat-title" style="margin-top:16px">Which shape is the weird?</h1>
+      <div class="dk-item" style="cursor:pointer" onclick="fw2Shape('a')"><div class="dk-q">Something happened \u2014 a moment, a comment, a text</div></div>
+      <div class="dk-item" style="cursor:pointer" onclick="fw2Shape('b')"><div class="dk-q">It's been growing in the background</div></div>
+      <div class="dk-item" style="cursor:pointer" onclick="fw2Shape('c')"><div class="dk-q">It spikes around them \u2014 before, after, or waiting to hear back</div></div>`;
+  } else if(fw2.step==='ev'){
+    const items=FW2_EV[fw2.shape]||[];
+    const list=items.map((it,i)=>`<div class="dk-item fw2-item${fw2.sel[i]?' on':''}" style="cursor:pointer" onclick="fw2Toggle(${i})"><div class="dk-q">${it.t}</div></div>`).join('');
+    body = `<h1 class="cat-title" style="margin-top:16px">Tap everything that's <em>true</em>.</h1>
+      <p class="cat-intro">Not what should be true, not what you can defend \u2014 just what is. Several can be true at once; that's the point.</p>
+      ${list}
+      <button class="dk-go" onclick="fw2Read()">Read the mix</button>
+      <button onclick="fw2Reset()" style="display:block;margin:12px auto 0;background:none;border:none;color:var(--ink-soft);font-family:'Inter',sans-serif;font-size:.8rem;text-decoration:underline;cursor:pointer">Start over</button>`;
+  } else {
+    body = `<div style="margin-top:16px">${fw2ResultHTML()}</div>`;
+  }
+  return back + head + body;
+}
+
 const PUA_GUIDE = {
  eyebrow:`Protection · The first few dates`,
  title:`If it feels like magic, check for the <em>machinery</em>.`,
@@ -2213,6 +2396,12 @@ function bonusHubHTML(){
        <div class="bc-s">For the moment itself — something's off tonight and you can't name it. A few quick taps to find out what kind of weird this is, whose signal it is, and the one next move that fits. Calm first, always.</div></div>
        <div class="bc-arrow">&#8250;</div>
      </div>
+     <div class="bonus-card" onclick="openModule('fw2');fw2Reset()">
+       <div class="bc-ic">&#9681;</div>
+       <div><div class="bc-t">Feeling weird and don't know what to do 2</div>
+       <div class="bc-s">The nuanced version. Instead of forcing one path, it lets you check everything that's true, weighs the mix, cross-references your saved reads — and tells you the order that matters. Compare it with the original.</div></div>
+       <div class="bc-arrow">&#8250;</div>
+     </div>
 ${attachPanelHTML()}
 ${darkPanelHTML()}`;
 }
@@ -2254,6 +2443,7 @@ function renderBonus(){
                : bonusModule==='gf' ? gfModuleHTML()
                : bonusModule==='fs' ? fsModuleHTML()
                : bonusModule==='fw' ? fwModuleHTML()
+               : bonusModule==='fw2' ? fw2ModuleHTML()
                : bonusHubHTML();
 }
 function openModule(m){ bonusModule=m; renderBonus(); window.scrollTo({top:0,behavior:'smooth'}); }
